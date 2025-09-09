@@ -13,12 +13,11 @@
 # Mark that we're about to enter script
 export INSIDE_SCRIPT=1
 
-# Attempt to get the currently focused i3 workspace name
-export WORKSPACE="$(i3-msg -t get_workspaces 2>/dev/null | jq -r '.[] | select(.focused==true).name' 2>/dev/null)"
-export WORKSPACE="${WORKSPACE:-unknown}"  # fallback if not in i3 or jq fails
-
-# Get term-session in current workspace
-export SESSION=$(i3-msg -t get_tree | jq '
+# Detect workspace and session context
+if command -v i3-msg >/dev/null && command -v jq >/dev/null; then
+    # Full i3 integration - get actual workspace and session info
+    export WORKSPACE="$(i3-msg -t get_workspaces 2>/dev/null | jq -r '.[] | select(.focused==true).name' 2>/dev/null)"
+    export SESSION=$(i3-msg -t get_tree | jq '
 def siblingsOfFocused:
   .nodes? as $kids
   | if ($kids | any(.focused == true)) then
@@ -53,10 +52,17 @@ def siblingsOfFocused:
     end;
 (siblingsOfFocused) as $result
 | $result.index
-')
+' 2>/dev/null)
+    export WORKSPACE="${WORKSPACE:-unknown}"
+else
+    # Simple fallback - just use terminal name and random session
+    echo "💡 If you had i3, you'd have session records of every shell."
+    export WORKSPACE="$(echo "${TERM:-terminal}" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]')"
+    export SESSION="$RANDOM"
+fi
 
-# Ensure log directory exists
-LOGDIR=~/nv/terminal-sessions/workspace-$WORKSPACE
+# Ensure log directory exists - configurable location
+LOGDIR="${THOMCOM_LOG_DIR:-$HOME/.thomcom_shell/logs}/workspace-$WORKSPACE"
 mkdir -p "$LOGDIR"
 
 # Build log filename: YYYY-MM-DD-workspace-<name>
@@ -69,4 +75,5 @@ echo "Current log size: $(du -sh $(dirname "$LOGDIR") 2>/dev/null | awk '{print 
 echo "Appending log to: $LOGFILE"
 
 # Replace this shell with 'script', appending all output
-exec script -a -f -q "$LOGFILE"
+# Run script with explicit shell command that sets INSIDE_SCRIPT=1
+exec script -a -f -q "$LOGFILE" -c "INSIDE_SCRIPT=1 CLAUDECODE= zsh -l"

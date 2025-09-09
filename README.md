@@ -133,6 +133,14 @@ view_session /path/to/session.log  # Clean viewing with ANSI strip
 replay /path/to/session.log 50     # Replay with 50-line chunks
 ```
 
+### Configuration
+
+By default, sessions are logged to `~/.thomcom_shell/logs/workspace-<name>/`. You can customize this location:
+
+```bash
+export THOMCOM_LOG_DIR="$HOME/my-custom-logs"  # Sessions go to ~/my-custom-logs/workspace-<name>/
+```
+
 ## 🔧 Tool Integrations
 
 ### Node.js (NVM)

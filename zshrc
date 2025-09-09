@@ -1,54 +1,65 @@
 #!/bin/zsh
-##############################################################################
+
+########
 # Modular ZSH Configuration - Main Entry Point
 # A beautifully organized shell configuration system
-##############################################################################
+########
 
-# Configuration root
-export THOMCOM_SHELL_ROOT="${0:A:h}"
+# Debug launcher - set to 1 to see loading progress
+DEBUG_LAUNCHER=${DEBUG_LAUNCHER:-0}
+
+# Configuration root - resolve through symlinks to actual directory
+export THOMCOM_SHELL_ROOT="$HOME/.thomcom_shell"
 
 # Source a module if it exists
 source_module() {
     [[ -f "$THOMCOM_SHELL_ROOT/$1" ]] && source "$THOMCOM_SHELL_ROOT/$1"
 }
 
-##############################################################################
+########
 # CORE - Always loaded (all shell types, including CLAUDECODE)
-##############################################################################
+########
+[[ $DEBUG_LAUNCHER -eq 1 ]] && echo "🐚 Loading core modules... CLAUDECODE=$CLAUDECODE INSIDE_SCRIPT=$INSIDE_SCRIPT"
 source_module "core/environment.zsh"
 source_module "core/options.zsh"
 source_module "core/history.zsh"
 
-##############################################################################
+########
 # TOOLS - Always loaded for functionality
-##############################################################################
+########
 source_module "tools/nvm.zsh"
 source_module "tools/conda.zsh"
 source_module "tools/fzf.zsh"
 source_module "tools/system.zsh"
 
-##############################################################################
+########
 # FEATURES - Broadcast system and other features
-##############################################################################
+########
 source_module "features/broadcast.zsh"
 
-##############################################################################
+########
 # WORK-SPECIFIC - Load if available and not in CLAUDECODE
-##############################################################################
+########
 [[ "$CLAUDECODE" != "1" && -f ~/.nvidia/work.zsh ]] && source ~/.nvidia/work.zsh
 
-##############################################################################
+########
 # TERMINAL SESSION LOGGING - Only for interactive non-CLAUDECODE shells
-##############################################################################
+########
+[[ $DEBUG_LAUNCHER -eq 1 ]] && echo "🔍 Logging check: interactive=$([[ -o interactive ]] && echo "YES" || echo "NO") CLAUDECODE=$CLAUDECODE INSIDE_SCRIPT=$INSIDE_SCRIPT"
 if [[ -o interactive && "$CLAUDECODE" != "1" && -z "$INSIDE_SCRIPT" ]]; then
+    [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "📝 Starting session logging - about to exec script!"
     # This will exec script and replace current process - must be last!
     source_module "logging/session-tracker.zsh"
+else
+    [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "⏭️  Skipping session logging"
 fi
 
-##############################################################################
+########
 # INTERACTIVE FEATURES - Only after logging setup (inside script session)
-##############################################################################
+########
+[[ $DEBUG_LAUNCHER -eq 1 ]] && echo "🎨 Interactive check: interactive=$([[ -o interactive ]] && echo "YES" || echo "NO") INSIDE_SCRIPT=$INSIDE_SCRIPT"
 if [[ -o interactive && -n "$INSIDE_SCRIPT" ]]; then
+    [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "🎨 Loading interactive features..."
     source_module "interactive/colors.zsh"
     source_module "interactive/prompt.zsh" 
     source_module "interactive/aliases.zsh"
@@ -59,6 +70,8 @@ if [[ -o interactive && -n "$INSIDE_SCRIPT" ]]; then
     command -v _nvidia_startup >/dev/null && _nvidia_startup
     
     echo "🚀 Thomcom Shell loaded successfully"
+else
+    [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "😐 No interactive features loaded (plain shell mode)"
 fi
 
 # Clean up
