@@ -1,0 +1,395 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~/.zshrc - Zsh refactor of your original Bash config
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Claude Code Agent Detection - Minimal setup for automated tools
+if [[ "$CLAUDECODE" == "1" ]]; then
+    # Minimal setup for Claude Code agents
+    export PATH="$HOME/.local/bin:$PATH"
+    export HISTFILE=~/.zsh_history
+    export HISTSIZE=1000
+    export SAVEHIST=1000
+    setopt SHARE_HISTORY
+    return
+fi
+
+##############################################################################
+# 1. Top-level: detect and log sessions using `script` unless already inside it
+##############################################################################
+if [[ -z "$INSIDE_SCRIPT" ]]; then
+  # Only run this block in a top-level interactive shell on XFCE
+  # (avoids infinite recursion once inside 'script')
+  if [[ "$XDG_CURRENT_DESKTOP" == "XFCE" && -o interactive ]]; then
+    export INSIDE_SCRIPT=1
+
+    # Attempt to get the currently focused i3 workspace name
+    export WORKSPACE="$(i3-msg -t get_workspaces 2>/dev/null | jq -r '.[] | select(.focused==true).name' 2>/dev/null)"
+    export WORKSPACE="${WORKSPACE:-unknown}"  # fallback if not in i3 or jq fails
+
+    # Get term-session in current workspace
+    export SESSION=$(i3-msg -t get_tree | jq '
+def siblingsOfFocused:
+  .nodes? as $kids
+  | if ($kids | any(.focused == true)) then
+      {
+        siblings: $kids,
+        index: (
+          $kids
+          | to_entries
+          | map(select(.value.focused == true).key)
+          | first
+          // -1
+        )
+      }
+    else
+      .floating_nodes? as $fkids
+      | if ($fkids | any(.focused == true)) then
+          {
+            siblings: $fkids,
+            index: (
+              $fkids
+              | to_entries
+              | map(select(.value.focused == true).key)
+              | first
+              // -1
+            )
+          }
+        else
+          # Recurse deeper into child nodes/floating_nodes 
+          ( .nodes[]?, .floating_nodes[]? )
+          | siblingsOfFocused
+      end
+    end;
+(siblingsOfFocused) as $result
+| $result.index
+')
+
+    # Ensure log directory exists
+    LOGDIR=~/nv/terminal-sessions/workspace-$WORKSPACE
+    mkdir -p "$LOGDIR"
+
+    # Build log filename: YYYY-MM-DD-workspace-<name>
+    BASEFILE="$(date +%Y-%m-%d)-workspace-$WORKSPACE"
+
+    LOGFILE="$LOGDIR/${BASEFILE}-session-${SESSION}.log"
+
+    # Show log folder size
+    echo "Current log size: $(du -sh $(dirname "$LOGDIR") 2>/dev/null | awk '{print $1}')"
+    echo "Appending log to: $LOGFILE"
+
+    # Replace this shell with 'script', appending all output
+    exec script -a -f -q "$LOGFILE"
+    # Run 'script' but DO NOT replace this shell; keep the window alive
+    script -a -f -q "$LOGFILE" -c "${SHELL:-/bin/zsh} -l"
+    status=$?
+    echo
+    echo "Inner session exited with status $status."
+    read -r "?Press Enter to return to this shell without closing the window: "
+    unset INSIDE_SCRIPT
+    return-f -q "$LOGFILE"
+  fi
+
+##############################################################################
+# 2. Else: We are inside the `script` sub-shell OR we've already set $INSIDE_SCRIPT
+#    => do normal environment setup, aliases, exports, etc.
+##############################################################################
+else
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # 2A. BASIC ZSH SETTINGS
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  ##############################################################################
+  #  🗃  Session-scoped history, batched to a shared file
+  ##############################################################################
+  export SHARED_HISTFILE=$HOME/.zsh_history
+  export SESSION_HISTFILE=${TMPDIR:-/tmp}/zsh_hist_${$}_${RANDOM}
+  HISTFILE=$SESSION_HISTFILE
+  HISTSIZE=1000000000000
+  SAVEHIST=$HISTSIZE
+
+  # 1. Load the shared history ONCE …
+  if [[ -r $SHARED_HISTFILE ]]; then
+    fc -R -- $SHARED_HISTFILE          # import
+    _flushed_cnt=${#history[@]}        # ← mark baseline so we don’t re-write it
+  fi
+
+  # 2. Flush only commands added *after* the baseline
+  integer FLUSH_EVERY=10
+  _hist_flush() {
+    fc -AI -- $SHARED_HISTFILE 2>/dev/null || fc -A -- $SHARED_HISTFILE 2>/dev/null
+    _flushed_cnt=${#history[@]}
+  }
+
+  # Essential history options
+  setopt APPEND_HISTORY          # Append rather than overwrite
+  setopt INC_APPEND_HISTORY      # Write immediately, don't wait for exit
+  setopt HIST_IGNORE_DUPS        # Ignore consecutive duplicates
+  
+  precmd()  { (( ${#history[@]} - _flushed_cnt >= FLUSH_EVERY )) && _hist_flush }
+  periodic() { (( ${#history[@]} > 0)) && _hist_flush }
+  
+  # Fix TRAPEXIT syntax and ensure history is written on exit
+  TRAPEXIT() { 
+    _hist_flush
+    # Clean up session temp file
+    [[ -f "$SESSION_HISTFILE" ]] && rm -f "$SESSION_HISTFILE"
+  }
+
+  # Example Zsh options:
+  # Turn on autocd (allows just typing directory name to cd)
+  setopt autocd
+  # Extended globbing for advanced pattern matching (^, etc.)
+  setopt extendedglob
+  # Turn off annoying beep on errors
+  unsetopt beep
+  # Interactive comments, please.
+  setopt interactivecomments
+  # Just run corrections
+  setopt CORRECT_ALL
+  # Do not exit on Ctrl-D
+  setopt ignoreeof
+
+  # Zsh vi mode
+  bindkey -v
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # 2B. ZSH COMPLETION SETUP
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # This part was added by `compinstall`; it loads Zsh’s completion system
+  zstyle :compinstall filename '/home/tcomer/.zshrc'
+  autoload -Uz compinit
+  compinit
+
+  # Kubernetes completion
+  source <(kubectl completion zsh)
+  alias k=kubectl
+  # In Zsh, link the completion function to the alias
+  compdef _kubectl k
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # 2C. INTERACTIVE GUARD (Optional)
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # If not running interactively, stop here
+  if [[ ! -o interactive ]]; then
+    return
+  fi
+
+  # For less-friendly input
+  [[ -x /usr/bin/lesspipe ]] && eval "$(SHELL=/bin/sh lesspipe)"
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # 2E. Prompt configuration
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # If you want color prompts, detect if the terminal supports them
+  if [[ "$TERM" == xterm-color || "$TERM" == *-256color ]]; then
+    color_prompt=yes
+  fi
+
+  # Minimal toggling for color
+  if [[ -n "$force_color_prompt" ]]; then
+    if command -v tput &>/dev/null && tput setaf 1 &>/dev/null; then
+      color_prompt=yes
+    else
+      color_prompt=
+    fi
+  fi
+
+  # Set title according to i3
+  echo -ne "\033]0;workspace-$WORKSPACE-session-$SESSION\007"
+
+  # For now, we’ll keep your PS1 with ANSI codes. Zsh might ignore \[ \] escapes.
+  PS1='%B%F{green}%n@%m%f:%B%F{blue}%~%f%b$ '
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # 2F. Color LS, aliases, etc.
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  if command -v dircolors &>/dev/null; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+  fi
+
+  alias ll='ls -alF'
+  alias la='ls -A'
+  alias l='ls -CF'
+  alias emacs='emacs -nw'
+  alias clang-format='clang-format-11'
+  alias xclip='xclip -selection clipboard'
+  bitwig() { GDK_SCALE=1 GDK_DPI_SCALE=1.42 /opt/bitwig-studio/bitwig-studio "$@"; }
+
+  ff() { /usr/bin/find . -name "$1"; }
+
+  alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" \
+    "$(history | tail -n1 | sed -e "s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//")"'
+
+  # If you have a ~/.zsh_aliases, source it
+  [[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
+
+  # (Bash) "shopt -oq posix" has no direct Zsh equivalent. Usually ignore in Zsh.
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # 2G. Environment variables
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  export ANDREI=10.20.170.88
+
+  # NVM & Node
+  export NVM_DIR="$HOME/.nvm"
+  [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+  [[ -s "$NVM_DIR/zsh_completion" ]] && source "$NVM_DIR/zsh_completion"
+
+  # Vi mode
+  set -o vi   # same as `bindkey -v`
+
+  # Perforce
+  export P4CONFIG="$HOME/mnt/NVIDIA/.p4config"
+  export P4ROOT="$HOME/mnt/NVIDIA/p4"
+
+  # Rapids aliases
+  alias rapids='cd ~/rapids/rc/compose; make rapids.run args="zsh -l"'
+  alias notebooks='cd ~/rapids/rc/compose; make notebooks.run'
+  alias node-rapids='cd ~/rapids/node; yarn docker:run:devel'
+
+  # Paths
+  export PATH=$PATH:/usr/local/cuda/bin:/home/tcomer/bin/s3cmd-2.3.0
+  export PATH=$PATH:~/bin
+
+  # fzf: source Zsh plugin
+  [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+  #export FZF_EXCLUDE="--exclude node_modules data __pycache__"
+  _fzf_compgen_path() { fd --follow $FZF_EXCLUDE . "$1"; }
+  _fzf_compgen_dir()  { fd --type d --follow $FZF_EXCLUDE . "$1"; }
+
+  # NoiseTorch
+  if [[ -d "$HOME/.local/bin" ]]; then
+    PATH="$HOME/.local/bin:$PATH"
+  fi
+
+  echo "Done loading default .zshrc"
+
+  # Load broadcast system
+  [[ -f ~/.zshrc_broadcast.sh ]] && source ~/.zshrc_broadcast.sh
+
+  # Mamba / Conda
+  export MAMBA_EXE='/home/tcomer/bin/micromamba'
+  export MAMBA_ROOT_PREFIX='/home/tcomer/data/micromamba/'
+  __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
+  if [[ $? -eq 0 ]]; then
+    eval "$__mamba_setup"
+  else
+    alias micromamba="$MAMBA_EXE"  # fallback
+  fi
+  unset __mamba_setup
+
+  # NGC CLI
+  export PATH="$PATH:/home/tcomer/bin/ngc-cli"
+
+  # Another chunk of Kubernetes completion
+  # (You already did `source <(kubectl completion zsh)` above.
+  #  Also note that `complete -F __start_kubectl k` is Bash-specific. 
+  #  We'll skip re-defining that.)
+  # If you REALLY want an alias plus compdef again:
+  #   alias k=kubectl
+  #   compdef _kubectl k
+
+  # "exit" alias
+  alias exit="echo Use 'logout' to exit"
+
+  # pip cache
+  export PIP_CACHE_DIR=/home/tcomer/data/pip_cache
+
+  # private keys
+  [[ -f ~/.keys.sh ]] && source ~/.keys.sh
+
+  # CUDA switches
+  alias use-cuda12='export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}} && export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}'
+  alias use-cuda11='export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}} && export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}'
+
+  # Better session replays
+  view_session () {
+    LC_ALL=C \
+    sed -E $'s/\x1B\\[[0-?]*[ -\\/]*[@-~]//g' "$1" |   # drop ANSI CSI sequences
+    tr -d '\r\a' |                                     # zap ^M and ^G
+    less -FX                                           # page (-F quits if one screen, -X keeps screen on exit)
+  }
+
+  # replay  LOGFILE  [lines_per_chunk]
+  #         ^^^^^^^  default = 50
+  replay () {
+      [[ -r $1 ]] || { echo "usage: replay LOGFILE [chunk]" >&2; return 1; }
+
+      local log=$1
+      local lines=${2:-50}
+
+      scriptreplay <(
+          awk -v L="$lines" '
+              { bytes += length($0 ORS); count++ }
+              (count==L) {
+                  printf "0 %.0f\n", bytes; bytes = 0; count = 0
+              }
+              END { if (bytes) printf "0 %.0f\n", bytes }
+          ' "$log"
+      )  "$log"
+  }
+
+  #compdef gitlab-ci-local
+  ###-begin-gitlab-ci-local-completions-###
+  #
+  # yargs command completion script
+  #
+  # Installation: /usr/local/bin/gitlab-ci-local completion >> ~/.zshrc
+  #    or /usr/local/bin/gitlab-ci-local completion >> ~/.zprofile on OSX.
+  #
+  #_gitlab-ci-local_yargs_completions()
+  #{
+  #  local reply
+  #  local si=$IFS
+  #  IFS=$'
+  #' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" /usr/local/bin/gitlab-ci-local --get-yargs-completions "${words[@]}"))
+  #  IFS=$si
+  #  _describe 'values' reply
+  #}
+  #compdef _gitlab-ci-local_yargs_completions gitlab-ci-local
+  ###-end-gitlab-ci-local-completions-###
+  
+  # No powerdown
+  xset s off -dpms
+
+  alias gcl='gitlab-ci-local'
+
+  # CMake for LSH
+  export CMAKE_PREFIX_PATH=$CONDA_PREFIX:$CMAKE_PREFIX_PATH
+
+  # Turn off screensaver auto
+  xset s off -dpms
+
+  # Added by NVCODEX installer
+  export PATH="$PATH:/home/tcomer/.nvcodex/bin"
+
+  # Page with nvim?
+  export MANPAGER="vim -c 'Man!' -o -"
+
+  # always du sensibly
+  du() {
+    command du -h -d 1 -- "$@"
+  }
+
+  # Startup default
+  cd /home/tcomer/nv/cv/cvds
+  micromamba activate vius
+  export VOLTA_HOME="$HOME/.volta"
+  export PATH="$VOLTA_HOME/bin:$PATH"
+  export PATH="$HOME/.local/bin:$PATH"
+  export PYTHONPATH=$PWD
+  export GRADLE_HOME=/opt/gradle/gradle-8.8
+  export ADB_PATH=/home/tcomer/Android/Sdk/platform-tools
+  export PATH=$PATH:$GRADLE_HOME/bin:$ADB_PATH
+  export PATH=$PATH:~/.local/bin
+fi

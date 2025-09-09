@@ -1,0 +1,9 @@
+# Sensitive or machine-specific files that should not be committed
+*.log
+*.tmp
+*~
+.DS_Store
+
+# Work-specific files should be in ~/.nvidia/ instead
+work/
+secret/
