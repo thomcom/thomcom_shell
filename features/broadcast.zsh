@@ -3,8 +3,7 @@
 #  📡 ZSH Broadcast System - Execute commands in all active zsh sessions
 ##############################################################################
 
-# Skip broadcast setup for Claude Code agents
-[[ "$CLAUDECODE" == "1" ]] && return
+# CLAUDECODE agents get broadcast functionality but skip interactive features
 
 # Create broadcast directory
 mkdir -p ~/.zsh_broadcasts
@@ -15,9 +14,11 @@ export ZSH_BROADCAST_STATE=~/.zsh_broadcast_state_$$
 # Initialize state file with current broadcasts (avoid executing old ones on startup)
 if [[ ! -f "$ZSH_BROADCAST_STATE" ]]; then
   # Mark all existing broadcasts as processed
+  setopt NULL_GLOB  # Don't error on no matches
   for broadcast in ~/.zsh_broadcasts/broadcast_*; do
     [[ -f "$broadcast" ]] && echo "$(basename "$broadcast")" >> "$ZSH_BROADCAST_STATE"
   done
+  unsetopt NULL_GLOB
 fi
 
 # Process new broadcasts
@@ -26,6 +27,7 @@ _check_broadcasts() {
   local broadcast_cmd
   local broadcast_name
   
+  setopt NULL_GLOB  # Don't error on no matches
   for broadcast_file in ~/.zsh_broadcasts/broadcast_*; do
     [[ -f "$broadcast_file" ]] || continue
     
@@ -53,6 +55,7 @@ _check_broadcasts() {
       echo "$broadcast_name" >> "$ZSH_BROADCAST_STATE"
     fi
   done
+  unsetopt NULL_GLOB
 }
 
 # Signal handler for broadcasts
@@ -60,25 +63,27 @@ TRAPUSR1() {
   _check_broadcasts
 }
 
-# Hook into existing precmd for periodic checking
-_broadcast_precmd() {
-  # Check for broadcasts periodically (every 10 commands to avoid overhead)
-  (( ${#history[@]} % 10 == 0 )) && _check_broadcasts
-}
+# Hook into existing precmd for periodic checking (skip for CLAUDECODE)
+if [[ "$CLAUDECODE" != "1" ]]; then
+  _broadcast_precmd() {
+    # Check for broadcasts periodically (every 10 commands to avoid overhead)
+    (( ${#history[@]} % 10 == 0 )) && _check_broadcasts
+  }
 
-# Add our check to precmd - handle if precmd already exists
-if (( ${+functions[precmd]} )); then
-  # Rename existing precmd
-  functions[_orig_precmd]=${functions[precmd]}
-  precmd() {
-    _orig_precmd "$@"
-    _broadcast_precmd
-  }
-else
-  # No existing precmd, create one
-  precmd() {
-    _broadcast_precmd
-  }
+  # Add our check to precmd - handle if precmd already exists
+  if (( ${+functions[precmd]} )); then
+    # Rename existing precmd
+    functions[_orig_precmd]=${functions[precmd]}
+    precmd() {
+      _orig_precmd "$@"
+      _broadcast_precmd
+    }
+  else
+    # No existing precmd, create one
+    precmd() {
+      _broadcast_precmd
+    }
+  fi
 fi
 
 # Broadcast command function
@@ -103,15 +108,17 @@ _cleanup_broadcast_state() {
   [[ -f "$ZSH_BROADCAST_STATE" ]] && rm -f "$ZSH_BROADCAST_STATE"
 }
 
-# Add cleanup to existing TRAPEXIT if it exists
-if (( ${+functions[TRAPEXIT]} )); then
-  functions[_orig_trapexit]=${functions[TRAPEXIT]}
-  TRAPEXIT() {
-    _orig_trapexit "$@"
-    _cleanup_broadcast_state
-  }
-else
-  TRAPEXIT() {
-    _cleanup_broadcast_state
-  }
+# Add cleanup to existing TRAPEXIT if it exists (skip for CLAUDECODE)
+if [[ "$CLAUDECODE" != "1" ]]; then
+  if (( ${+functions[TRAPEXIT]} )); then
+    functions[_orig_trapexit]=${functions[TRAPEXIT]}
+    TRAPEXIT() {
+      _orig_trapexit "$@"
+      _cleanup_broadcast_state
+    }
+  else
+    TRAPEXIT() {
+      _cleanup_broadcast_state
+    }
+  fi
 fi

@@ -1,0 +1,30 @@
+FROM ubuntu:22.04
+
+# Install essential dependencies
+RUN apt-get update && apt-get install -y \
+    zsh \
+    git \
+    curl \
+    jq \
+    fd-find \
+    ripgrep \
+    fzf \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create test user (non-root)
+RUN useradd -m -s /bin/zsh testuser
+USER testuser
+WORKDIR /home/testuser
+
+# Copy shell configuration
+COPY --chown=testuser:testuser . /home/testuser/.thomcom_shell/
+
+# Create symlink to zshrc
+RUN ln -s /home/testuser/.thomcom_shell/zshrc /home/testuser/.zshrc
+
+# Set up minimal directories that the shell expects
+RUN mkdir -p /home/testuser/.zsh_broadcasts
+
+# Entry point for testing
+CMD ["/bin/zsh", "-l"]
