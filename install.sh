@@ -96,12 +96,14 @@ main() {
     mkdir -p "$HOME/.zsh_broadcasts"
     success "Broadcast directory created"
     
-    # Handle work-specific configuration
-    if [[ ! -d "$HOME/.nvidia" ]]; then
-        mkdir -p "$HOME/.nvidia"
-        info "Created ~/.nvidia directory for work-specific configurations"
+    # Handle work-specific configuration  
+    # Use configurable secrets directory (defaults to .secrets for general use)
+    SECRETS_DIR="${THOMCOM_SECRETS_DIR:-$HOME/.secrets}"
+    if [[ ! -d "$SECRETS_DIR" ]]; then
+        mkdir -p "$SECRETS_DIR"
+        info "Created $SECRETS_DIR directory for work-specific configurations"
         
-        cat > "$HOME/.nvidia/work.zsh" << 'EOF'
+        cat > "$SECRETS_DIR/work.zsh" << 'EOF'
 #!/bin/zsh
 ##############################################################################
 # Work-Specific Configuration
@@ -114,17 +116,18 @@ main() {
 # Example: Work-specific aliases  
 # alias deploy='./scripts/deploy.sh'
 
-# Example: Startup commands
+# Example: Startup commands (called automatically if defined)
 # _work_startup() {
 #     cd ~/work/projects
+#     micromamba activate work-env
 # }
 EOF
-        info "Created template work configuration at ~/.nvidia/work.zsh"
+        info "Created template work configuration at $SECRETS_DIR/work.zsh"
     fi
     
     # Run tests to verify installation
     info "Running installation tests..."
-    if "$SHELL_DIR/test_modular_shell.sh" >/dev/null 2>&1; then
+    if "$SHELL_DIR/tests/test_suite.sh" >/dev/null 2>&1; then
         success "All tests passed"
     else
         warning "Some tests failed - installation may have issues"
@@ -134,8 +137,8 @@ EOF
     echo "Next steps:"
     echo "1. Start a new shell session or run: source ~/.zshrc"
     echo "2. Try the broadcast system: zbc \"echo Hello from all sessions!\""
-    echo "3. Edit ~/.nvidia/work.zsh for work-specific configurations"
-    echo "4. Run ~/.thomcom_shell/test_modular_shell.sh to verify everything works"
+    echo "3. Edit $SECRETS_DIR/work.zsh for work-specific configurations"
+    echo "4. Run ./tests/test_suite.sh to verify everything works"
     echo
     echo "Documentation: $SHELL_DIR/README.md"
     echo "Support: https://github.com/thomcom/thomcom-shell/issues"

@@ -80,9 +80,8 @@ sudo pacman -S zsh git jq fd ripgrep fzf
 ├── features/                # ✨ Advanced features
 │   └── broadcast.zsh       # Multi-session broadcasting
 └── tests/                   # 🧪 Test suite
-    ├── test_modular_shell.sh
-    ├── test_in_docker.sh
-    └── Dockerfile.test
+    ├── test_suite.sh        # Comprehensive test runner
+    └── Dockerfile.test      # Docker test environment
 ```
 
 ## 🎯 Loading Strategy
@@ -166,12 +165,12 @@ export THOMCOM_LOG_DIR="$HOME/my-custom-logs"  # Sessions go to ~/my-custom-logs
 
 ### Work-Specific Configuration
 
-Keep sensitive or company-specific settings in `~/.nvidia/work.zsh`:
+Keep sensitive or company-specific settings in your secrets directory (defaults to `~/.secrets/work.zsh`):
 
 ```bash
 #!/bin/zsh
 # Work-specific settings
-export COMPANY_API_KEY="secret"
+export COMPANY_API_KEY="secret"  
 export VPN_CONFIG="/path/to/config"
 
 alias deploy='kubectl apply -f ./k8s/'
@@ -181,6 +180,12 @@ _work_startup() {
     cd ~/work/projects
     micromamba activate work-env
 }
+```
+
+**Configurable Location**: Set `THOMCOM_SECRETS_DIR` to use a custom directory:
+```bash
+export THOMCOM_SECRETS_DIR="$HOME/.nvidia"  # Use .nvidia for work
+export THOMCOM_SECRETS_DIR="$HOME/.company" # Use .company for corporate
 ```
 
 ### Custom Modules

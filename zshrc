@@ -40,7 +40,7 @@ source_module "features/broadcast.zsh"
 ########
 # WORK-SPECIFIC - Load if available and not in CLAUDECODE
 ########
-[[ "$CLAUDECODE" != "1" && -f ~/.nvidia/work.zsh ]] && source ~/.nvidia/work.zsh
+[[ "$CLAUDECODE" != "1" && -f "$THOMCOM_SECRETS_DIR/work.zsh" ]] && source "$THOMCOM_SECRETS_DIR/work.zsh"
 
 ########
 # TERMINAL SESSION LOGGING - Only for interactive non-CLAUDECODE shells
@@ -67,7 +67,7 @@ if [[ -o interactive && -n "$INSIDE_SCRIPT" ]]; then
     source_module "logging/replay-tools.zsh"
     
     # Work-specific startup (if available)
-    command -v _nvidia_startup >/dev/null && _nvidia_startup
+    command -v _work_startup >/dev/null && _work_startup
     
     echo "🚀 Thomcom Shell loaded successfully"
 else

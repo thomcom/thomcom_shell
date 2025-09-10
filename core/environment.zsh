@@ -40,10 +40,16 @@ export PATH="$VOLTA_HOME/bin:$PATH"
 export PIP_CACHE_DIR=$HOME/data/pip_cache
 export PYTHONPATH=$PWD
 
+# Terminal session logging directory
+export THOMCOM_LOG_DIR="$HOME/data/terminal-sessions"
+
+# Work/secrets directory (configurable - defaults to .secrets for general use)
+export THOMCOM_SECRETS_DIR="${THOMCOM_SECRETS_DIR:-$HOME/.secrets}"
+
 # Additional tools (work-specific tools loaded separately)
 
 # Manual/pager configuration
 export MANPAGER="vim -c 'Man!' -o -"
 
 # Private keys (if available)
-[[ -f ~/.nvidia/keys.sh ]] && source ~/.nvidia/keys.sh
+[[ -f "$THOMCOM_SECRETS_DIR/keys.sh" ]] && source "$THOMCOM_SECRETS_DIR/keys.sh"
