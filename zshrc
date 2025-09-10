@@ -70,10 +70,10 @@ if [[ -o interactive && -n "$INSIDE_SCRIPT" ]]; then
     
     # Show welcome tutorial on first launch
     if [[ ! -f ~/.thomcom_shell/.welcomed ]]; then
-        cat ~/.thomcom_shell/interactive/1st_launch.md 2>/dev/null || echo "🚀 Thomcom Shell loaded successfully"
+        cat ~/.thomcom_shell/interactive/1st_launch.md 2>/dev/null || echo "🚀 thomcom Shell loaded successfully"
         touch ~/.thomcom_shell/.welcomed
     else
-        echo "🚀 Thomcom Shell loaded successfully"
+        echo "🚀 thomcom Shell loaded successfully"
     fi
 else
     [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "😐 No interactive features loaded (plain shell mode)"

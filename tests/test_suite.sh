@@ -1,6 +1,6 @@
 #!/bin/bash
 ##############################################################################
-# Quick Thomcom Shell Validation - Simple tests that actually work
+# Quick thomcom Shell Validation - Simple tests that actually work
 ##############################################################################
 
 GREEN='\033[0;32m'
@@ -8,7 +8,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${BLUE}🧪 Quick Thomcom Shell Tests${NC}\n"
+echo -e "${BLUE}🧪 Quick thomcom Shell Tests${NC}\n"
 
 # Test 1: Basic files exist
 echo "Test 1: Core files exist"

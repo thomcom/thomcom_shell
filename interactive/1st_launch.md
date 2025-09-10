@@ -1,4 +1,4 @@
-🚀 Welcome to Thomcom Shell! Here's what you just gained:
+🚀 Welcome to thomcom Shell! Here's what you just gained:
 
 📡 Broadcast Commands to All Terminals
 • zbc "export NEW_VAR=value" - Set environment variables everywhere

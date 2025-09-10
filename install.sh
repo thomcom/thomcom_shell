@@ -1,6 +1,6 @@
 #!/bin/bash
 ##############################################################################
-# Thomcom Shell Installer
+# thomcom Shell Installer
 # Installs and configures the modular ZSH shell system
 ##############################################################################
 
@@ -30,7 +30,7 @@ has_command() {
 
 # Main installation function
 main() {
-    echo -e "${BLUE}🚀 Thomcom Shell Installer${NC}\n"
+    echo -e "${BLUE}🚀 thomcom Shell Installer${NC}\n"
     
     # Check prerequisites
     info "Checking prerequisites..."
@@ -107,7 +107,7 @@ main() {
         git pull
         success "Updated from repository"
     else
-        info "Cloning Thomcom Shell repository..."
+        info "Cloning thomcom Shell repository..."
         git clone "$REPO_URL" "$SHELL_DIR"
         success "Repository cloned"
     fi

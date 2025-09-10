@@ -1,4 +1,4 @@
-# Thomcom Shell Configuration
+# thomcom Shell Configuration
 
 A beautifully modular, context-aware ZSH configuration system that adapts to different environments and use cases - carefully integrated with Claude Code.
 
