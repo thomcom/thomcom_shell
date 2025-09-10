@@ -1,6 +1,20 @@
 #!/bin/zsh
 ##############################################################################
-# Conda/Mamba Integration
+# Conda/Mamba Integration (Micromamba)
+##############################################################################
+#
+# Seamless Python environment management with lightning-fast micromamba.
+# Handles the complex initialization dance so you get instant access to
+# conda commands and environments without the typical setup headaches.
+#
+# Benefits:
+# - 10x faster than traditional conda (thanks to micromamba's C++ rewrite)
+# - Auto-detects and initializes micromamba if installed
+# - CLAUDECODE-aware: provides simple alias in AI environments
+# - CMake integration for compiled Python extensions
+# - Graceful fallback if micromamba isn't available
+# - No error spam in non-interactive shells
+#
 ##############################################################################
 
 # Mamba / Conda setup

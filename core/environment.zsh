@@ -3,6 +3,20 @@
 # Core Environment - Essential exports and paths
 # Loaded by all shells (interactive, non-interactive, CLAUDECODE)
 ##############################################################################
+#
+# The foundation layer that sets up your development environment consistently
+# across all shell contexts. Every tool, every binary, every environment
+# variable that should be available everywhere gets configured here.
+#
+# Benefits:
+# - Universal PATH setup ensures tools are always available
+# - Consistent environment across interactive, non-interactive, and AI shells
+# - Centralized configuration prevents environment variable conflicts
+# - Development tool paths (CUDA, Gradle, Node, Python) properly configured
+# - Terminal session logging directory properly configured
+# - Clean separation from work-specific sensitive configurations
+#
+##############################################################################
 
 # Essential PATH components
 export PATH="$HOME/.local/bin:$PATH"

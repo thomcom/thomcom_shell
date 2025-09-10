@@ -1,6 +1,6 @@
 # Thomcom Shell Configuration
 
-A beautifully modular, context-aware ZSH configuration system that adapts to different environments and use cases.
+A beautifully modular, context-aware ZSH configuration system that adapts to different environments and use cases - carefully integrated with Claude Code.
 
 ## ✨ Features
 
@@ -29,11 +29,12 @@ source ~/.zshrc
 - **ZSH** - The Z Shell (5.8+)
 - **Git** - Version control system
 
-### Optional (Recommended)
+### Recommended
+- **Micromamba** - Fast Python/conda package manager (auto-installed by installer)
 - **jq** - JSON processor (for workspace detection)
 - **fd** / **fd-find** - Fast file finder
-- **ripgrep** (rg) - Fast text search
-- **fzf** - Fuzzy finder
+- **ripgrep** (rg) - Fast text search  
+- **fzf** - Fuzzy finder with Ctrl+R history search
 - **Docker** - For running tests
 
 #### Installation Commands
@@ -119,12 +120,14 @@ zbc "echo 'Deployment complete!'"  # Notify all sessions
 
 ## 📝 Session Logging
 
-Automatic terminal session recording with intelligent workspace detection:
+Never forget. Automatic terminal session recording with intelligent workspace detection:
 
 - **Workspace-aware** - Logs organized by i3/workspace context
 - **Non-intrusive** - Uses `script` command for perfect fidelity  
 - **Replay tools** - Built-in functions for session analysis
 - **Size management** - Displays log folder size on startup
+
+TODO: Compression/encryption.
 
 ### Replay Commands
 
@@ -193,51 +196,18 @@ echo 'alias mycommand="echo Hello World"' > ~/.thomcom_shell/interactive/my-alia
 
 ## 🧪 Testing
 
-Comprehensive test suite ensures reliability:
+Single comprehensive test suite validates all functionality:
 
 ```bash
-# Run all tests
-~/.thomcom_shell/test_modular_shell.sh
+# Run complete test suite
+./tests/test_suite.sh
 
-# Test in clean Docker environment  
-~/.thomcom_shell/test_in_docker.sh
-
-# Test specific functionality
-docker run --rm -e CLAUDECODE=1 thomcom-shell-test zsh -c 'source ~/.zshrc && zbc "echo test"'
-```
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-**Broadcast system not working:**
-```bash
-# Check if zbc function exists
-command -v zbc
-
-# Verify broadcast directory
-ls -la ~/.zsh_broadcasts/
-
-# Test signal handling
-kill -USR1 $$
-```
-
-**Module not loading:**
-```bash
-# Check module exists
-ls ~/.thomcom_shell/path/to/module.zsh
-
-# Test module independently  
-source ~/.thomcom_shell/path/to/module.zsh
-```
-
-**History not working:**
-```bash
-# Check history settings
-echo $HISTFILE $HISTSIZE $SAVEHIST
-
-# Verify history file exists
-ls -la $HISTFILE
+# Tests include:
+# - Module loading and structure validation
+# - CLAUDECODE environment compatibility
+# - Broadcast system functionality  
+# - Tool integration (NVM, Conda, FZF)
+# - Docker-based isolated testing
 ```
 
 ## 📊 Performance
@@ -252,7 +222,7 @@ ls -la $HISTFILE
 1. Fork the repository
 2. Create a feature branch
 3. Add tests for new functionality  
-4. Ensure all tests pass: `./test_in_docker.sh`
+4. Ensure all tests pass: `./tests/test_suite.sh`
 5. Submit a pull request
 
 ## 📄 License
@@ -261,6 +231,6 @@ MIT License - feel free to adapt for your own use!
 
 ## 🙏 Credits
 
-Built with love by engineers who believe shell configuration should be beautiful, functional, and maintainable.
+Built with love by thomcom and CC, who believe shell configuration should be beautiful, functional, and maintainable.
 
 Special thanks to the ZSH community and all the amazing tools that make this possible.

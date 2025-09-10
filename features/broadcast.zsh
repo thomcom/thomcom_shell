@@ -2,6 +2,20 @@
 ##############################################################################
 #  📡 ZSH Broadcast System - Execute commands in all active zsh sessions
 ##############################################################################
+#
+# This revolutionary system allows you to send commands to ALL active zsh 
+# sessions simultaneously. Perfect for environment management, deployments,
+# and synchronized terminal operations. Uses file-based communication with
+# SIGUSR1 signals for instant delivery.
+#
+# Benefits:
+# - Instant environment variable synchronization across all terminals
+# - Broadcast source commands to reload configs everywhere at once
+# - Perfect for deployment workflows and multi-session management
+# - Race-condition safe with atomic file operations
+# - Auto-cleanup prevents stale command accumulation
+#
+##############################################################################
 
 # CLAUDECODE agents get broadcast functionality but skip interactive features
 
