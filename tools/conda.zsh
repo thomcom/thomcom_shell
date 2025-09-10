@@ -32,3 +32,13 @@ unset __mamba_setup
 
 # CMake integration with conda
 export CMAKE_PREFIX_PATH=$CONDA_PREFIX:$CMAKE_PREFIX_PATH
+
+# Auto-activate dev-tools environment (our foundational development environment)
+if [[ "$CLAUDECODE" != "1" && -z "$CONDA_DEFAULT_ENV" ]]; then
+    if "$MAMBA_EXE" env list | grep -q "dev-tools" 2>/dev/null; then
+        micromamba activate dev-tools 2>/dev/null || true
+    elif "$MAMBA_EXE" env list | grep -q "micromamba_environment" 2>/dev/null; then
+        # Fallback to old environment name for existing installations  
+        micromamba activate micromamba_environment 2>/dev/null || true
+    fi
+fi

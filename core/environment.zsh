@@ -43,8 +43,8 @@ export PYTHONPATH=$PWD
 # Terminal session logging directory
 export THOMCOM_LOG_DIR="$HOME/data/terminal-sessions"
 
-# Work/secrets directory (configurable - defaults to .secrets for general use)
-export THOMCOM_SECRETS_DIR="${THOMCOM_SECRETS_DIR:-$HOME/.secrets}"
+# Work/secrets directory (configurable - defaults to .nvidia for nvidia work)
+export THOMCOM_SECRETS_DIR="${THOMCOM_SECRETS_DIR:-$HOME/.nvidia}"
 
 # Additional tools (work-specific tools loaded separately)
 

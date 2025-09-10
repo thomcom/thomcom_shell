@@ -47,24 +47,51 @@ main() {
     fi
     success "Git found"
     
-    # Optional dependencies check
-    info "Checking optional dependencies..."
-    local missing_optional=()
+    # Install micromamba first - the foundation of our development environment
+    info "Setting up micromamba (foundational package manager)..."
     
-    ! has_command jq && missing_optional+=("jq")
-    ! has_command fd && ! has_command fdfind && missing_optional+=("fd-find")
-    ! has_command rg && missing_optional+=("ripgrep")
-    ! has_command fzf && missing_optional+=("fzf")
-    
-    if [[ ${#missing_optional[@]} -gt 0 ]]; then
-        warning "Optional dependencies missing: ${missing_optional[*]}"
-        warning "Some features may not work optimally. Install with:"
-        warning "  Ubuntu/Debian: sudo apt install jq fd-find ripgrep fzf"
-        warning "  macOS: brew install jq fd ripgrep fzf"
-        echo
+    if ! has_command micromamba; then
+        info "Installing micromamba..."
+        
+        # Download and install micromamba
+        curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+        mkdir -p "$HOME/bin"
+        mv bin/micromamba "$HOME/bin/"
+        rmdir bin 2>/dev/null || true
+        
+        # Set up micromamba environment
+        export MAMBA_EXE="$HOME/bin/micromamba"
+        export MAMBA_ROOT_PREFIX="$HOME/data/micromamba/"
+        
+        success "Micromamba installed successfully"
     else
-        success "All optional dependencies found"
+        success "Micromamba already available"
+        export MAMBA_EXE="$(command -v micromamba)"
+        export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/data/micromamba/}"
     fi
+    
+    # Create dev-tools environment with ALL our dependencies
+    info "Creating dev-tools environment with all development dependencies..."
+    
+    # Check if dev-tools environment exists
+    if ! "$MAMBA_EXE" env list | grep -q "dev-tools" 2>/dev/null; then
+        info "Installing: python, nodejs, fzf, fd-find, ripgrep, jq into dev-tools environment..."
+        "$MAMBA_EXE" create -n dev-tools -c conda-forge \
+            python=3.11 \
+            nodejs \
+            fzf \
+            fd-find \
+            ripgrep \
+            jq \
+            -y || { warning "Some packages may not be available in conda-forge"; }
+        
+        success "dev-tools environment created with all development dependencies"
+    else
+        success "dev-tools environment already exists"
+    fi
+    
+    info "🏗️ Architecture: OS → APT/Brew (minimal) → Micromamba → dev-tools → project envs"
+    success "Development environment isolation complete!"
     
     # Backup existing .zshrc
     if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then

@@ -25,11 +25,10 @@ source_module "core/options.zsh"
 source_module "core/history.zsh"
 
 ########
-# TOOLS - Always loaded for functionality
+# TOOLS - Always loaded for functionality (fzf last to prevent keybinding conflicts)
 ########
 source_module "tools/nvm.zsh"
-source_module "tools/conda.zsh"
-source_module "tools/fzf.zsh"
+source_module "tools/conda.zsh" 
 source_module "tools/system.zsh"
 
 ########
@@ -69,10 +68,21 @@ if [[ -o interactive && -n "$INSIDE_SCRIPT" ]]; then
     # Work-specific startup (if available)
     command -v _work_startup >/dev/null && _work_startup
     
-    echo "🚀 Thomcom Shell loaded successfully"
+    # Show welcome tutorial on first launch
+    if [[ ! -f ~/.thomcom_shell/.welcomed ]]; then
+        cat ~/.thomcom_shell/interactive/1st_launch.md 2>/dev/null || echo "🚀 Thomcom Shell loaded successfully"
+        touch ~/.thomcom_shell/.welcomed
+    else
+        echo "🚀 Thomcom Shell loaded successfully"
+    fi
 else
     [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "😐 No interactive features loaded (plain shell mode)"
 fi
+
+########
+# FZF - Load last to prevent keybinding conflicts with other tools
+########
+source_module "tools/fzf.zsh"
 
 # Clean up
 unset -f source_module

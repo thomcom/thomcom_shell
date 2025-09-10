@@ -23,36 +23,53 @@ ln -s ~/.thomcom_shell/zshrc ~/.zshrc
 source ~/.zshrc
 ```
 
-## 📦 Dependencies
+## 📦 Dependencies & Architecture
 
-### Required
-- **ZSH** - The Z Shell (5.8+)
+### System Requirements (Minimal)
+- **ZSH** - The Z Shell (5.8+) 
 - **Git** - Version control system
+- **curl** - For downloading micromamba
 
-### Recommended
-- **Micromamba** - Fast Python/conda package manager (auto-installed by installer)
-- **jq** - JSON processor (for workspace detection)
-- **fd** / **fd-find** - Fast file finder
-- **ripgrep** (rg) - Fast text search  
-- **fzf** - Fuzzy finder with Ctrl+R history search
-- **Docker** - For running tests
+### Development Dependencies (Auto-Installed via Micromamba)
+The installer creates a **foundational development environment** using micromamba:
 
-#### Installation Commands
+```bash
+# The installer automatically creates "dev-tools" environment with:
+# - Python 3.11
+# - Node.js  
+# - fzf (fuzzy finder)
+# - fd-find (fast file search)
+# - ripgrep (fast text search)
+# - jq (JSON processor)
+```
+
+### 🏗️ Environmental Architecture Philosophy
+
+```
+Operating System (Ubuntu/macOS/Arch)
+└── System Package Manager (APT/Homebrew/Pacman) 
+    └── Micromamba (Foundational Package Manager)
+        └── dev-tools environment (All development tools)
+            └── Project-specific environments (per project)
+```
+
+**Key Principle**: Never pollute your system environment. All development tools live in isolated, reproducible micromamba environments.
+
+#### System Package Installation (Minimal Only)
 
 **Ubuntu/Debian:**
 ```bash
-sudo apt update
-sudo apt install zsh git jq fd-find ripgrep fzf
+sudo apt update && sudo apt install zsh git curl
 ```
 
 **macOS:**
 ```bash
-brew install zsh git jq fd ripgrep fzf
+brew install zsh git curl
 ```
 
 **Arch Linux:**
 ```bash
-sudo pacman -S zsh git jq fd ripgrep fzf
+sudo pacman -S zsh git curl
 ```
 
 ## 🏗️ Architecture
