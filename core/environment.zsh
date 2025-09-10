@@ -52,4 +52,4 @@ export THOMCOM_SECRETS_DIR="${THOMCOM_SECRETS_DIR:-$HOME/.nvidia}"
 export MANPAGER="vim -c 'Man!' -o -"
 
 # Private keys (if available)
-[[ -f "$THOMCOM_SECRETS_DIR/keys.sh" ]] && source "$THOMCOM_SECRETS_DIR/keys.sh"
+[[ -f "$THOMCOM_SECRETS_DIR/.keys.sh" ]] && source "$THOMCOM_SECRETS_DIR/.keys.sh"

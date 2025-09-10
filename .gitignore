@@ -4,9 +4,13 @@
 *~
 .DS_Store
 
-# Work-specific files should be in ~/.work/ instead
+# Work-specific files should be in ~/.nvidia/ instead
 work/
-secret//.claude-workspace/
-/.claude-current-workspace
-/.claude-workspace
+secret/
+
+# Claude Code workspace isolation
+.claude-workspace/
+.claude-current-workspace
+
+# First-run marker
 .welcomed
