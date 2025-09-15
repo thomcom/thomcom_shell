@@ -233,15 +233,14 @@ EOF
     fi
     
     echo -e "\n${GREEN}🎉 Installation completed successfully!${NC}\n"
-    echo "Next steps:"
-    echo "1. Start ZSH: zsh"
-    echo "2. Or start a new terminal session (if ZSH is now default)"
-    echo "3. Try the broadcast system: zbc \"echo Hello from all sessions!\""
-    echo "4. Edit $SECRETS_DIR/work.zsh for work-specific configurations"
-    echo "5. Run ./tests/test_suite.sh to verify everything works"
+    echo "Starting ZSH with your new configuration..."
     echo
     echo "Documentation: $SHELL_DIR/README.md"
     echo "Support: https://github.com/thomcom/thomcom-shell/issues"
+    echo
+    
+    # Source the configuration and start ZSH to demonstrate it works
+    exec zsh -c "source ~/.zshrc; exec zsh"
 }
 
 # Check if running as root
