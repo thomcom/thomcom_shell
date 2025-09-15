@@ -200,10 +200,16 @@ EOF
     if [[ "$SHELL" != *"zsh"* ]]; then
         info "Setting ZSH as default shell..."
         if grep -q "$(which zsh)" /etc/shells; then
-            chsh -s "$(which zsh)" 2>/dev/null || warning "Could not change default shell - you may need to run: chsh -s \$(which zsh)"
-            success "ZSH set as default shell (takes effect on next login)"
+            # Use timeout to prevent hanging, and make it non-interactive
+            if timeout 10s chsh -s "$(which zsh)" 2>/dev/null; then
+                success "ZSH set as default shell (takes effect on next login)"
+            else
+                warning "Could not change default shell automatically"
+                info "To set manually, run: chsh -s \$(which zsh)"
+            fi
         else
-            warning "ZSH not in /etc/shells - please add it manually or run: echo \$(which zsh) | sudo tee -a /etc/shells"
+            warning "ZSH not in /etc/shells - please add it manually:"
+            info "Run: echo \$(which zsh) | sudo tee -a /etc/shells"
         fi
     fi
     
