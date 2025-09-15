@@ -13,9 +13,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration
-SHELL_DIR="$HOME/.thomcom_shell"
-REPO_URL="https://github.com/thomcom/thomcom-shell.git"  # Update with actual repo
+# Configuration - determine location from script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SHELL_DIR="$SCRIPT_DIR"
+REPO_URL="https://github.com/thomcom/thomcom-shell.git"  # Only used for remote installs
 
 # Helper functions
 info() { echo -e "${BLUE}ℹ $1${NC}"; }
@@ -35,11 +36,29 @@ main() {
     # Check prerequisites
     info "Checking prerequisites..."
     
-    # Check for zsh
+    # Check for zsh and install if missing
     if ! has_command zsh; then
-        error "ZSH is required but not installed. Please install zsh first."
+        warning "ZSH not found - attempting to install..."
+        
+        if has_command apt-get; then
+            sudo apt-get update && sudo apt-get install -y zsh
+        elif has_command yum; then
+            sudo yum install -y zsh
+        elif has_command pacman; then
+            sudo pacman -S --noconfirm zsh
+        elif has_command brew; then
+            brew install zsh
+        else
+            error "Could not determine package manager. Please install zsh manually and re-run."
+        fi
+        
+        if ! has_command zsh; then
+            error "ZSH installation failed. Please install zsh manually and re-run."
+        fi
+        success "ZSH installed successfully"
+    else
+        success "ZSH found: $(zsh --version)"
     fi
-    success "ZSH found: $(zsh --version)"
     
     # Check for git
     if ! has_command git; then
@@ -127,16 +146,14 @@ main() {
         success "Backup created"
     fi
     
-    # Clone or update repository
-    if [[ -d "$SHELL_DIR" ]]; then
-        info "Updating existing installation..."
+    # Update repository if we're in a git repo
+    info "Setting up from repository at: $SHELL_DIR"
+    if [[ -d "$SHELL_DIR/.git" ]]; then
         cd "$SHELL_DIR"
-        git pull
-        success "Updated from repository"
+        git pull 2>/dev/null || info "No git updates available (offline or already current)"
+        success "Repository updated"
     else
-        info "Cloning thomcom Shell repository..."
-        git clone "$REPO_URL" "$SHELL_DIR"
-        success "Repository cloned"
+        success "Using local files (not a git repository)"
     fi
     
     # Create symlink
@@ -179,6 +196,17 @@ EOF
         info "Created template work configuration at $SECRETS_DIR/work.zsh"
     fi
     
+    # Set ZSH as default shell if not already
+    if [[ "$SHELL" != *"zsh"* ]]; then
+        info "Setting ZSH as default shell..."
+        if grep -q "$(which zsh)" /etc/shells; then
+            chsh -s "$(which zsh)" 2>/dev/null || warning "Could not change default shell - you may need to run: chsh -s \$(which zsh)"
+            success "ZSH set as default shell (takes effect on next login)"
+        else
+            warning "ZSH not in /etc/shells - please add it manually or run: echo \$(which zsh) | sudo tee -a /etc/shells"
+        fi
+    fi
+    
     # Run tests to verify installation
     info "Running installation tests..."
     if "$SHELL_DIR/tests/test_suite.sh" >/dev/null 2>&1; then
@@ -189,10 +217,11 @@ EOF
     
     echo -e "\n${GREEN}🎉 Installation completed successfully!${NC}\n"
     echo "Next steps:"
-    echo "1. Start a new shell session or run: source ~/.zshrc"
-    echo "2. Try the broadcast system: zbc \"echo Hello from all sessions!\""
-    echo "3. Edit $SECRETS_DIR/work.zsh for work-specific configurations"
-    echo "4. Run ./tests/test_suite.sh to verify everything works"
+    echo "1. Start ZSH: zsh"
+    echo "2. Or start a new terminal session (if ZSH is now default)"
+    echo "3. Try the broadcast system: zbc \"echo Hello from all sessions!\""
+    echo "4. Edit $SECRETS_DIR/work.zsh for work-specific configurations"
+    echo "5. Run ./tests/test_suite.sh to verify everything works"
     echo
     echo "Documentation: $SHELL_DIR/README.md"
     echo "Support: https://github.com/thomcom/thomcom-shell/issues"
