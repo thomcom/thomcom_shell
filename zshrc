@@ -37,9 +37,9 @@ source_module "tools/system.zsh"
 source_module "features/broadcast.zsh"
 
 ########
-# WORK-SPECIFIC - Load if available and not in CLAUDECODE
+# WORK-SPECIFIC - Load if available (includes CLAUDECODE for full environment access)
 ########
-[[ "$CLAUDECODE" != "1" && -f "$THOMCOM_SECRETS_DIR/work.zsh" ]] && source "$THOMCOM_SECRETS_DIR/work.zsh"
+[[ -f "$THOMCOM_SECRETS_DIR/work.zsh" ]] && source "$THOMCOM_SECRETS_DIR/work.zsh"
 
 ########
 # TERMINAL SESSION LOGGING - Only for interactive non-CLAUDECODE shells
