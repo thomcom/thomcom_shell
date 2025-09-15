@@ -82,11 +82,19 @@ main() {
         export MAMBA_EXE="$HOME/bin/micromamba"
         export MAMBA_ROOT_PREFIX="$HOME/data/micromamba/"
         
+        # Add to PATH for this session
+        export PATH="$HOME/bin:$PATH"
+        
         success "Micromamba installed successfully"
     else
         success "Micromamba already available"
         export MAMBA_EXE="$(command -v micromamba)"
         export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/data/micromamba/}"
+    fi
+    
+    # Verify micromamba is working
+    if ! "$MAMBA_EXE" --version >/dev/null 2>&1; then
+        error "Micromamba installation failed or not accessible at: $MAMBA_EXE"
     fi
     
     # Create dev-tools environment with ALL our dependencies
@@ -95,7 +103,8 @@ main() {
     # Check if dev-tools environment exists
     if ! "$MAMBA_EXE" env list | grep -q "dev-tools" 2>/dev/null; then
         info "Installing: python, nodejs, neovim, fzf, fd-find, ripgrep, jq into dev-tools environment..."
-        "$MAMBA_EXE" create -n dev-tools -c conda-forge \
+        
+        if "$MAMBA_EXE" create -n dev-tools -c conda-forge \
             python=3.11 \
             nodejs \
             neovim \
@@ -103,9 +112,11 @@ main() {
             fd-find \
             ripgrep \
             jq \
-            -y || { warning "Some packages may not be available in conda-forge"; }
-        
-        success "dev-tools environment created with all development dependencies"
+            -y; then
+            success "dev-tools environment created with all development dependencies"
+        else
+            error "Failed to create dev-tools environment. Check internet connection and try again."
+        fi
         
         # Install copilot for neovim
         info "Setting up neovim with copilot..."
