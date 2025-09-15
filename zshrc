@@ -54,10 +54,10 @@ else
 fi
 
 ########
-# INTERACTIVE FEATURES - Only after logging setup (inside script session)
+# INTERACTIVE FEATURES - Load for all interactive shells
 ########
 [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "🎨 Interactive check: interactive=$([[ -o interactive ]] && echo "YES" || echo "NO") INSIDE_SCRIPT=$INSIDE_SCRIPT"
-if [[ -o interactive && -n "$INSIDE_SCRIPT" ]]; then
+if [[ -o interactive ]]; then
     [[ $DEBUG_LAUNCHER -eq 1 ]] && echo "🎨 Loading interactive features..."
     source_module "interactive/colors.zsh"
     source_module "interactive/prompt.zsh" 
