@@ -88,9 +88,14 @@ main() {
         success "Micromamba installed successfully"
     else
         success "Micromamba already available"
-        export MAMBA_EXE="$(command -v micromamba)"
-        export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/data/micromamba/}"
+        # Don't use existing micromamba - use our own installation for consistency
+        export MAMBA_EXE="$HOME/bin/micromamba"
+        export MAMBA_ROOT_PREFIX="$HOME/data/micromamba"
     fi
+    
+    # Force clean micromamba configuration for this session
+    unset CONDA_PREFIX CONDA_DEFAULT_ENV
+    export CONDARC=""  # Disable any existing conda config
     
     # Ensure micromamba root directory exists with proper permissions
     if [[ ! -d "$MAMBA_ROOT_PREFIX" ]]; then
