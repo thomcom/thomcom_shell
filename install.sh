@@ -92,6 +92,15 @@ main() {
         export MAMBA_ROOT_PREFIX="${MAMBA_ROOT_PREFIX:-$HOME/data/micromamba/}"
     fi
     
+    # Ensure micromamba root directory exists with proper permissions
+    if [[ ! -d "$MAMBA_ROOT_PREFIX" ]]; then
+        mkdir -p "$MAMBA_ROOT_PREFIX"
+        info "Created micromamba root directory: $MAMBA_ROOT_PREFIX"
+    fi
+    
+    # Fix permissions if needed
+    chmod 755 "$MAMBA_ROOT_PREFIX" 2>/dev/null || true
+    
     # Verify micromamba is working
     if ! "$MAMBA_EXE" --version >/dev/null 2>&1; then
         error "Micromamba installation failed or not accessible at: $MAMBA_EXE"
@@ -100,8 +109,8 @@ main() {
     # Create dev-tools environment with ALL our dependencies
     info "Creating dev-tools environment with all development dependencies..."
     
-    # Check if dev-tools environment exists
-    if ! "$MAMBA_EXE" env list | grep -q "dev-tools" 2>/dev/null; then
+    # Check if dev-tools environment exists (with proper error handling)
+    if ! "$MAMBA_EXE" env list 2>/dev/null | grep -q "dev-tools"; then
         info "Installing: python, nodejs, neovim, fzf, fd-find, ripgrep, jq into dev-tools environment..."
         
         if "$MAMBA_EXE" create -n dev-tools -c conda-forge \
