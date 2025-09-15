@@ -7,7 +7,7 @@
 [[ ! -o interactive ]] && return
 
 # Initialize Zsh completion system
-zstyle :compinstall filename '/home/tcomer/.zshrc'
+zstyle :compinstall filename "$HOME/.zshrc"
 autoload -Uz compinit
 compinit
 
