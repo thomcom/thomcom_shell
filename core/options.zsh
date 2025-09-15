@@ -9,6 +9,9 @@ setopt extendedglob        # Extended globbing for advanced pattern matching
 setopt interactivecomments # Allow comments in interactive shell
 setopt ignoreeof          # Don't exit on Ctrl-D
 
+# Vi mode (universal)
+set -o vi
+
 # Correction settings
 setopt CORRECT_ALL        # Run corrections
 
