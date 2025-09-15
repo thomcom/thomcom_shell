@@ -111,55 +111,15 @@ main() {
         error "Micromamba installation failed or not accessible at: $MAMBA_EXE"
     fi
     
-    # Create dev-tools environment with ALL our dependencies
-    info "Creating dev-tools environment with all development dependencies..."
-    
-    # Check if dev-tools environment exists (with proper error handling)
-    if ! "$MAMBA_EXE" env list 2>/dev/null | grep -q "dev-tools"; then
-        info "Installing: python, nodejs, neovim, fzf, fd-find, ripgrep, jq into dev-tools environment..."
-        
-        if "$MAMBA_EXE" create -n dev-tools -c conda-forge \
-            python=3.11 \
-            nodejs \
-            neovim \
-            fzf \
-            fd-find \
-            ripgrep \
-            jq \
-            -y; then
-            success "dev-tools environment created with all development dependencies"
-        else
-            error "Failed to create dev-tools environment. Check internet connection and try again."
-        fi
-        
-        # Install copilot for neovim
-        info "Setting up neovim with copilot..."
-        if [[ ! -d "$HOME/.config/nvim" ]]; then
-            info "No existing nvim config found - will install mature thomcom/vim config later"
-            info "Try this mature and minimal thomcom/vim config: https://github.com/thomcom/vim"
-        else
-            info "Existing nvim config detected - preserving your setup"
-        fi
-        
-        # Install vim-plug for plugin management
-        if [[ ! -f "$HOME/.local/share/nvim/site/autoload/plug.vim" ]]; then
-            info "Installing vim-plug for neovim..."
-            curl -fLo "$HOME/.local/share/nvim/site/autoload/plug.vim" --create-dirs \
-                https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-            success "vim-plug installed"
-        fi
-        
-    else
-        success "dev-tools environment already exists"
-        
-        # Still check for neovim in existing environment
-        info "Checking for neovim in existing dev-tools environment..."
-        if ! "$MAMBA_EXE" list -n dev-tools neovim | grep -q neovim 2>/dev/null; then
-            info "Adding neovim to existing dev-tools environment..."
-            "$MAMBA_EXE" install -n dev-tools -c conda-forge neovim -y
-            success "neovim added to dev-tools environment"
-        fi
+    # Install vim-plug for neovim (lightweight setup)
+    if [[ ! -f "$HOME/.local/share/nvim/site/autoload/plug.vim" ]]; then
+        info "Installing vim-plug for neovim..."
+        curl -fLo "$HOME/.local/share/nvim/site/autoload/plug.vim" --create-dirs \
+            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 2>/dev/null
+        success "vim-plug installed"
     fi
+    
+    info "Note: dev-tools environment will be created automatically on first shell startup"
     
     info "🏗️ Architecture: OS → APT/Brew (minimal) → Micromamba → dev-tools → project envs"
     success "Development environment isolation complete!"

@@ -35,6 +35,21 @@ export CMAKE_PREFIX_PATH=$CONDA_PREFIX:$CMAKE_PREFIX_PATH
 
 # Auto-activate dev-tools environment (our foundational development environment)
 if [[ "$CLAUDECODE" != "1" && -z "$CONDA_DEFAULT_ENV" ]]; then
+    # Create dev-tools environment if it doesn't exist
+    if ! "$MAMBA_EXE" env list | grep -q "dev-tools" 2>/dev/null; then
+        echo "🔧 Creating dev-tools environment with essential packages..."
+        "$MAMBA_EXE" create -n dev-tools -c conda-forge \
+            python=3.11 \
+            nodejs \
+            neovim \
+            fzf \
+            fd-find \
+            ripgrep \
+            jq \
+            -y 2>/dev/null || echo "⚠️  Some packages may not be available"
+    fi
+    
+    # Activate dev-tools environment
     if "$MAMBA_EXE" env list | grep -q "dev-tools" 2>/dev/null; then
         micromamba activate dev-tools 2>/dev/null || true
     elif "$MAMBA_EXE" env list | grep -q "micromamba_environment" 2>/dev/null; then
