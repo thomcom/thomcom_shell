@@ -1,0 +1,18 @@
+# xremap configuration
+# Remaps Caps Lock to Escape, Escape to Grave, and Super+hjkl to arrow keys
+
+modmap:
+  - name: Swap Caps Lock and Escape, then map Escape to Grave
+    remap:
+      CapsLock: Esc
+  - name: Physical Escape key to Grave
+    remap:
+      KEY_ESC: Grave
+
+keymap:
+  - name: Super+hjkl to arrow keys
+    remap:
+      Super-h: Left
+      Super-j: Down
+      Super-k: Up
+      Super-l: Right
