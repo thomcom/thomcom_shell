@@ -8,14 +8,14 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 1 | Core Syntax Conversion | All zsh syntax → bash syntax | CORE-01-04, SYN-01-04 |
+| 1 | Core Syntax Conversion | All zsh syntax -> bash syntax | CORE-01-04, SYN-01-04 |
 | 2 | Signal & Hook Migration | Traps and PROMPT_COMMAND working | SIG-01-03, HOOK-01-03 |
 | 3 | Installer Update | Install configures bash | INS-01-04 |
 | 4 | Test & Verify | All tests pass under bash | TST-01-04 |
 
 ---
 
-## Phase 1: Core Syntax Conversion ✓
+## Phase 1: Core Syntax Conversion
 
 **Goal:** Convert all zsh-specific syntax to bash equivalents
 
@@ -26,9 +26,9 @@
 **Plans:** 3 plans
 
 Plans:
-- [x] 01-01-PLAN.md — Convert core files and bashrc entry point
-- [x] 01-02-PLAN.md — Convert complex tools (atuin, fzf, completion, broadcast)
-- [x] 01-03-PLAN.md — Verify all syntax conversions
+- [x] 01-01-PLAN.md - Convert core files and bashrc entry point
+- [x] 01-02-PLAN.md - Convert complex tools (atuin, fzf, completion, broadcast)
+- [x] 01-03-PLAN.md - Verify all syntax conversions
 
 **Success Criteria:**
 1. All `.zsh` files renamed to `.sh`
@@ -38,12 +38,12 @@ Plans:
 5. Files parse without syntax errors under `bash -n`
 
 **Files to modify:**
-- `zshrc` → `bashrc`
-- `core/*.zsh` → `core/*.sh`
-- `tools/*.zsh` → `tools/*.sh`
-- `features/*.zsh` → `features/*.sh`
-- `interactive/*.zsh` → `interactive/*.sh`
-- `logging/*.zsh` → `logging/*.sh`
+- `zshrc` -> `bashrc`
+- `core/*.zsh` -> `core/*.sh`
+- `tools/*.zsh` -> `tools/*.sh`
+- `features/*.zsh` -> `features/*.sh`
+- `interactive/*.zsh` -> `interactive/*.sh`
+- `logging/*.zsh` -> `logging/*.sh`
 
 ---
 
@@ -53,7 +53,12 @@ Plans:
 
 **Requirements:** SIG-01, SIG-02, SIG-03, HOOK-01, HOOK-02, HOOK-03
 
-**Plans:** (created by /gsd:plan-phase)
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md - Enable signal handlers and PROMPT_COMMAND in broadcast.sh
+- [ ] 02-02-PLAN.md - Add incremental history via PROMPT_COMMAND
+- [ ] 02-03-PLAN.md - Verify Phase 2 completion
 
 **Success Criteria:**
 1. `zbc` command sends USR1 to all bash processes
@@ -112,14 +117,14 @@ trap '_cleanup' EXIT
 ## Dependencies
 
 ```
-Phase 1 (syntax) ──┬──→ Phase 2 (signals)
-                   │
-                   └──→ Phase 3 (installer)
-                              │
-Phase 2 ───────────────────┬──┘
-                           │
-                           v
-                      Phase 4 (test)
+Phase 1 (syntax) ---+---> Phase 2 (signals)
+                    |
+                    +---> Phase 3 (installer)
+                               |
+Phase 2 --------------------+--+
+                            |
+                            v
+                       Phase 4 (test)
 ```
 
 Phases 2 and 3 can run in parallel after Phase 1.
