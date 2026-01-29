@@ -1,0 +1,61 @@
+#!/bin/bash
+##############################################################################
+# Core Environment - Essential exports and paths
+# Loaded by all shells (interactive, non-interactive, CLAUDECODE)
+##############################################################################
+#
+# The foundation layer that sets up your development environment consistently
+# across all shell contexts. Every tool, every binary, every environment
+# variable that should be available everywhere gets configured here.
+#
+# Benefits:
+# - Universal PATH setup ensures tools are always available
+# - Consistent environment across interactive, non-interactive, and AI shells
+# - Centralized configuration prevents environment variable conflicts
+# - Development tool paths (CUDA, Gradle, Node, Python) properly configured
+# - Terminal session logging directory properly configured
+# - Clean separation from work-specific sensitive configurations
+#
+##############################################################################
+
+# Ensure TERMINFO points to kitty's terminfo when using kitty
+[[ "$TERM" == *kitty* ]] && export TERMINFO=/usr/lib/kitty/terminfo
+
+# Essential PATH components
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:/usr/local/cuda/bin"
+export PATH="$PATH:$HOME/bin/s3cmd-2.3.0"
+export PATH="$PATH:$HOME/bin"
+export PATH="$PATH:$HOME/.local/bin"
+
+# Core environment variables (work-specific vars loaded separately)
+
+# GPU rendering - force AMD RX 580 (DRI_PRIME=1 uses discrete GPU)
+export DRI_PRIME=1
+
+# Build tools
+export GRADLE_HOME=/opt/gradle/gradle-8.8
+export ADB_PATH=$HOME/Android/Sdk/platform-tools
+export PATH="$PATH:$GRADLE_HOME/bin:$ADB_PATH"
+
+# Development tools
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+
+# Python/Pip configuration
+export PIP_CACHE_DIR=$HOME/data/pip_cache
+export PYTHONPATH=$PWD
+
+# Terminal session logging directory
+export THOMCOM_LOG_DIR="$HOME/data/terminal-sessions"
+
+# Work/secrets directory (configurable - defaults to .nvidia for nvidia work)
+export THOMCOM_SECRETS_DIR="${THOMCOM_SECRETS_DIR:-$HOME/.nvidia}"
+
+# Additional tools (work-specific tools loaded separately)
+
+# Manual/pager configuration
+export MANPAGER="vim -c 'Man!' -o -"
+
+# Private keys (if available)
+[[ -f "$THOMCOM_SECRETS_DIR/.keys.sh" ]] && source "$THOMCOM_SECRETS_DIR/.keys.sh"
