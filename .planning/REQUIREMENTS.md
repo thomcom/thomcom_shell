@@ -7,10 +7,10 @@
 
 ### Core Migration
 
-- [ ] **CORE-01**: All `.zsh` files renamed to `.sh`
-- [ ] **CORE-02**: `zshrc` becomes `bashrc` with bash syntax
-- [ ] **CORE-03**: `setopt` calls converted to `shopt` equivalents
-- [ ] **CORE-04**: `[[ -o interactive ]]` → `[[ $- == *i* ]]`
+- [x] **CORE-01**: All `.zsh` files renamed to `.sh`
+- [x] **CORE-02**: `zshrc` becomes `bashrc` with bash syntax
+- [x] **CORE-03**: `setopt` calls converted to `shopt` equivalents
+- [x] **CORE-04**: `[[ -o interactive ]]` → `[[ $- == *i* ]]`
 
 ### Signal Handlers
 
@@ -26,10 +26,10 @@
 
 ### Syntax Conversion
 
-- [ ] **SYN-01**: zsh arrays → bash arrays
-- [ ] **SYN-02**: `${(k)hash}` → `${!hash[@]}`
-- [ ] **SYN-03**: `functions[name]` → `declare -f name`
-- [ ] **SYN-04**: All zsh-specific expansions removed
+- [x] **SYN-01**: zsh arrays → bash arrays
+- [x] **SYN-02**: `${(k)hash}` → `${!hash[@]}`
+- [x] **SYN-03**: `functions[name]` → `declare -f name`
+- [x] **SYN-04**: All zsh-specific expansions removed
 
 ### Installer
 
@@ -57,20 +57,20 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 1 | Pending |
-| CORE-02 | Phase 1 | Pending |
-| CORE-03 | Phase 1 | Pending |
-| CORE-04 | Phase 1 | Pending |
+| CORE-01 | Phase 1 | Complete |
+| CORE-02 | Phase 1 | Complete |
+| CORE-03 | Phase 1 | Complete |
+| CORE-04 | Phase 1 | Complete |
 | SIG-01 | Phase 2 | Pending |
 | SIG-02 | Phase 2 | Pending |
 | SIG-03 | Phase 2 | Pending |
 | HOOK-01 | Phase 2 | Pending |
 | HOOK-02 | Phase 2 | Pending |
 | HOOK-03 | Phase 2 | Pending |
-| SYN-01 | Phase 1 | Pending |
-| SYN-02 | Phase 1 | Pending |
-| SYN-03 | Phase 1 | Pending |
-| SYN-04 | Phase 1 | Pending |
+| SYN-01 | Phase 1 | Complete |
+| SYN-02 | Phase 1 | Complete |
+| SYN-03 | Phase 1 | Complete |
+| SYN-04 | Phase 1 | Complete |
 | INS-01 | Phase 3 | Pending |
 | INS-02 | Phase 3 | Pending |
 | INS-03 | Phase 3 | Pending |
