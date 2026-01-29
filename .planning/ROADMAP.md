@@ -21,6 +21,13 @@
 
 **Requirements:** CORE-01, CORE-02, CORE-03, CORE-04, SYN-01, SYN-02, SYN-03, SYN-04
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Convert core files and bashrc entry point
+- [ ] 01-02-PLAN.md — Convert complex tools (atuin, fzf, completion, broadcast)
+- [ ] 01-03-PLAN.md — Verify all syntax conversions
+
 **Success Criteria:**
 1. All `.zsh` files renamed to `.sh`
 2. `zshrc` becomes `bashrc`
@@ -43,6 +50,8 @@
 **Goal:** Broadcast system and hooks work in bash
 
 **Requirements:** SIG-01, SIG-02, SIG-03, HOOK-01, HOOK-02, HOOK-03
+
+**Plans:** (created by /gsd:plan-phase)
 
 **Success Criteria:**
 1. `zbc` command sends USR1 to all bash processes
@@ -70,6 +79,8 @@ trap '_cleanup' EXIT
 
 **Requirements:** INS-01, INS-02, INS-03, INS-04
 
+**Plans:** (created by /gsd:plan-phase)
+
 **Success Criteria:**
 1. `install.sh` links `~/.bashrc` not `~/.zshrc`
 2. No `chsh` to zsh
@@ -84,6 +95,8 @@ trap '_cleanup' EXIT
 **Goal:** All functionality verified under bash
 
 **Requirements:** TST-01, TST-02, TST-03, TST-04
+
+**Plans:** (created by /gsd:plan-phase)
 
 **Success Criteria:**
 1. `tests/test_suite.sh` runs under bash
