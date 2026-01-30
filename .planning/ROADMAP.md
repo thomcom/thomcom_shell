@@ -53,12 +53,14 @@ Plans:
 
 **Requirements:** SIG-01, SIG-02, SIG-03, HOOK-01, HOOK-02, HOOK-03
 
+**Status:** Complete (2026-01-30)
+
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Enable signal handlers and PROMPT_COMMAND in broadcast.sh
-- [ ] 02-02-PLAN.md - Add incremental history via PROMPT_COMMAND
-- [ ] 02-03-PLAN.md - Verify Phase 2 completion
+- [x] 02-01-PLAN.md - Enable signal handlers and PROMPT_COMMAND in broadcast.sh
+- [x] 02-02-PLAN.md - Add incremental history via PROMPT_COMMAND
+- [x] 02-03-PLAN.md - Verify Phase 2 completion
 
 **Success Criteria:**
 1. `zbc` command sends USR1 to all bash processes
