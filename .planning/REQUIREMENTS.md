@@ -14,15 +14,15 @@
 
 ### Signal Handlers
 
-- [ ] **SIG-01**: `TRAPUSR1` → `trap '...' USR1`
-- [ ] **SIG-02**: `TRAPEXIT` → `trap '...' EXIT`
-- [ ] **SIG-03**: Broadcast system works with bash traps
+- [x] **SIG-01**: `TRAPUSR1` → `trap '...' USR1`
+- [x] **SIG-02**: `TRAPEXIT` → `trap '...' EXIT`
+- [x] **SIG-03**: Broadcast system works with bash traps
 
 ### Hooks & Prompts
 
-- [ ] **HOOK-01**: `precmd` → `PROMPT_COMMAND`
-- [ ] **HOOK-02**: Prompt (PS1) works in bash
-- [ ] **HOOK-03**: No zsh-specific prompt escapes
+- [x] **HOOK-01**: `precmd` → `PROMPT_COMMAND`
+- [x] **HOOK-02**: Prompt (PS1) works in bash
+- [x] **HOOK-03**: No zsh-specific prompt escapes
 
 ### Syntax Conversion
 
@@ -61,12 +61,12 @@
 | CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 1 | Complete |
 | CORE-04 | Phase 1 | Complete |
-| SIG-01 | Phase 2 | Pending |
-| SIG-02 | Phase 2 | Pending |
-| SIG-03 | Phase 2 | Pending |
-| HOOK-01 | Phase 2 | Pending |
-| HOOK-02 | Phase 2 | Pending |
-| HOOK-03 | Phase 2 | Pending |
+| SIG-01 | Phase 2 | Complete |
+| SIG-02 | Phase 2 | Complete |
+| SIG-03 | Phase 2 | Complete |
+| HOOK-01 | Phase 2 | Complete |
+| HOOK-02 | Phase 2 | Complete |
+| HOOK-03 | Phase 2 | Complete |
 | SYN-01 | Phase 1 | Complete |
 | SYN-02 | Phase 1 | Complete |
 | SYN-03 | Phase 1 | Complete |
