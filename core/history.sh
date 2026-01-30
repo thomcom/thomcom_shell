@@ -33,6 +33,21 @@ export SAVEHIST=100000
 
 shopt -s histappend           # Append to history file instead of overwrite
 export HISTCONTROL=ignoreboth # Ignore duplicates and commands starting with space
-# INC_APPEND_HISTORY deferred to Phase 2 (requires PROMPT_COMMAND)
+
+# Incremental history append (equivalent to zsh INC_APPEND_HISTORY)
+# Skip for CLAUDECODE agents - they don't need persistent history
+if [[ "$CLAUDECODE" != "1" ]]; then
+    _history_append() {
+        history -a  # Append new commands to HISTFILE
+    }
+
+    # Add to PROMPT_COMMAND (preserve existing hooks)
+    if [[ -n "$PROMPT_COMMAND" ]]; then
+        PROMPT_COMMAND="$PROMPT_COMMAND; _history_append"
+    else
+        PROMPT_COMMAND="_history_append"
+    fi
+fi
+
 # SHARE_HISTORY removed - complex in bash, not essential
 # HIST_REDUCE_BLANKS removed - bash doesn't have this
