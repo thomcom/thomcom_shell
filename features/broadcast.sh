@@ -82,23 +82,23 @@ _check_broadcasts() {
   shopt -u nullglob
 }
 
-# TODO Phase 2: Signal handler for broadcasts
-# trap '_check_broadcasts' USR1
+# Signal handler for broadcasts
+trap '_check_broadcasts' USR1
 
-# TODO Phase 2: Hook into PROMPT_COMMAND for periodic checking (skip for CLAUDECODE)
-# if [[ "$CLAUDECODE" != "1" ]]; then
-#   _broadcast_precmd() {
-#     # Check for broadcasts periodically (every 10 commands to avoid overhead)
-#     (( HISTCMD % 10 == 0 )) && _check_broadcasts
-#   }
-#
-#   # Add our check to PROMPT_COMMAND
-#   if [[ -n "$PROMPT_COMMAND" ]]; then
-#     PROMPT_COMMAND="$PROMPT_COMMAND; _broadcast_precmd"
-#   else
-#     PROMPT_COMMAND="_broadcast_precmd"
-#   fi
-# fi
+# Hook into PROMPT_COMMAND for periodic checking (skip for CLAUDECODE)
+if [[ "$CLAUDECODE" != "1" ]]; then
+  _broadcast_precmd() {
+    # Check for broadcasts periodically (every 10 commands to avoid overhead)
+    (( HISTCMD % 10 == 0 )) && _check_broadcasts
+  }
+
+  # Add our check to PROMPT_COMMAND
+  if [[ -n "$PROMPT_COMMAND" ]]; then
+    PROMPT_COMMAND="$PROMPT_COMMAND; _broadcast_precmd"
+  else
+    PROMPT_COMMAND="_broadcast_precmd"
+  fi
+fi
 
 # Broadcast command function
 zbc() {
@@ -123,7 +123,7 @@ _cleanup_broadcast_state() {
   [[ -f "$BASH_BROADCAST_STATE" ]] && rm -f "$BASH_BROADCAST_STATE"
 }
 
-# TODO Phase 2: Add cleanup on exit (skip for CLAUDECODE)
-# if [[ "$CLAUDECODE" != "1" ]]; then
-#   trap '_cleanup_broadcast_state' EXIT
-# fi
+# Add cleanup on exit (skip for CLAUDECODE)
+if [[ "$CLAUDECODE" != "1" ]]; then
+  trap '_cleanup_broadcast_state' EXIT
+fi
