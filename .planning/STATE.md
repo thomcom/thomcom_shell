@@ -1,17 +1,17 @@
 # Project State
 
 **Project:** .thomcom_shell bash Migration
-**Current Phase:** 2 of 4 (Signal & Hook Migration)
-**Plan:** 03 of 03 in Phase 2
-**Status:** Phase 2 complete
-**Last Activity:** 2026-01-30 - Completed 02-03-PLAN.md (Phase 2 verification gate)
+**Current Phase:** 3 of 4 (Installer Update)
+**Plan:** 01 of 01 in Phase 3
+**Status:** Phase 3 complete
+**Last Activity:** 2026-01-31 - Completed 03-01-PLAN.md (install.sh bash conversion)
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-01-28)
 
 **Core value:** Universal, non-interruptive shell configuration
-**Current focus:** Phase 2 - Signal & Hook Migration
+**Current focus:** Phase 3 - Installer Update
 
 ## Progress
 
@@ -25,13 +25,16 @@ Phase 2: Signal & Hook Migration
 - [x] 02-02: Incremental history via PROMPT_COMMAND
 - [x] 02-03: Phase 2 verification gate
 
-Progress: █████░░░░░ 50% (5/10 plans across all phases)
+Phase 3: Installer Update
+- [x] 03-01: Convert install.sh to bash configuration
+
+Progress: ██████░░░░ 60% (6/10 plans across all phases)
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | 1. Core Syntax Conversion | ✓ Complete | 100% (3/3 plans) |
 | 2. Signal & Hook Migration | ✓ Complete | 100% (3/3 plans) |
-| 3. Installer Update | ○ Pending | 0% |
+| 3. Installer Update | ✓ Complete | 100% (1/1 plans) |
 | 4. Test & Verify | ○ Pending | 0% |
 
 ## Decisions Made
@@ -47,6 +50,9 @@ Progress: █████░░░░░ 50% (5/10 plans across all phases)
 | claudecode-optimization | 02-02 | Skip history append for CLAUDECODE agents | Agents don't need persistent history |
 | signal-hooks-activated | 02-01 | Enabled USR1, EXIT traps and PROMPT_COMMAND hooks | Phase 2 migration complete, maintained CLAUDECODE guards |
 | phase2-verified | 02-03 | All signal/hook requirements verified (SIG-01-03, HOOK-01-03) | broadcast.sh and history.sh fully converted, zero zsh trap syntax |
+| no-chsh | 03-01 | Do not change user's default shell | bash config works universally - removed chsh logic |
+| no-zsh-install | 03-01 | bash always available - no installation needed | Removed zsh installation section entirely |
+| phase3-complete | 03-01 | install.sh converted to bash configuration | Zero zsh references, links ~/.bashrc, creates ~/.bash_broadcasts |
 
 ## Blockers/Concerns
 
@@ -54,11 +60,11 @@ None
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 16:38
-**Stopped at:** Completed 02-03-PLAN.md (Phase 2 verification gate)
+**Last session:** 2026-01-31 16:53
+**Stopped at:** Completed 03-01-PLAN.md (install.sh bash conversion)
 **Resume file:** None
-**Next:** Begin Phase 3 (Installer Update) - 03-01-PLAN.md
+**Next:** Begin Phase 4 (Test & Verify) - see ROADMAP.md for Phase 4 plans
 
 ---
 *State initialized: 2026-01-28*
-*Last updated: 2026-01-30*
+*Last updated: 2026-01-31*
