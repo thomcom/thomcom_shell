@@ -88,12 +88,12 @@ trap '_cleanup' EXIT
 
 **Requirements:** INS-01, INS-02, INS-03, INS-04
 
-**Status:** Planned
+**Status:** Complete (2026-01-31)
 
 **Plans:** 1 plan
 
 Plans:
-- [ ] 03-01-PLAN.md - Convert install.sh to configure bash
+- [x] 03-01-PLAN.md - Convert install.sh to configure bash
 
 **Success Criteria:**
 1. `install.sh` links `~/.bashrc` not `~/.zshrc`
