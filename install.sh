@@ -1,7 +1,7 @@
 #!/bin/bash
 ##############################################################################
 # thomcom Shell Installer
-# Installs and configures the modular ZSH shell system
+# Installs and configures the modular bash shell system
 ##############################################################################
 
 set -e
@@ -36,30 +36,9 @@ main() {
     # Check prerequisites
     info "Checking prerequisites..."
     
-    # Check for zsh and install if missing
-    if ! has_command zsh; then
-        warning "ZSH not found - attempting to install..."
-        
-        if has_command apt-get; then
-            sudo apt-get update && sudo apt-get install -y zsh
-        elif has_command yum; then
-            sudo yum install -y zsh
-        elif has_command pacman; then
-            sudo pacman -S --noconfirm zsh
-        elif has_command brew; then
-            brew install zsh
-        else
-            error "Could not determine package manager. Please install zsh manually and re-run."
-        fi
-        
-        if ! has_command zsh; then
-            error "ZSH installation failed. Please install zsh manually and re-run."
-        fi
-        success "ZSH installed successfully"
-    else
-        success "ZSH found: $(zsh --version)"
-    fi
-    
+    # bash is always available on Linux/Unix systems - no installation needed
+    success "bash found: $(bash --version | head -n1)"
+
     # Check for git
     if ! has_command git; then
         error "Git is required but not installed. Please install git first."
@@ -111,6 +90,64 @@ main() {
         error "Micromamba installation failed or not accessible at: $MAMBA_EXE"
     fi
     
+    # Install NVM (Node Version Manager)
+    if [[ ! -d "$HOME/.nvm" ]]; then
+        info "Installing NVM..."
+        export NVM_DIR="$HOME/.nvm"
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        success "NVM installed"
+    else
+        success "NVM already available"
+    fi
+
+    # Load NVM for this session
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+
+    # Install Node LTS via NVM
+    if ! has_command node; then
+        info "Installing Node.js LTS via NVM..."
+        nvm install --lts
+        nvm use --lts
+        success "Node.js installed: $(node --version)"
+    else
+        success "Node.js already available: $(node --version)"
+    fi
+
+    # Install Claude Code CLI
+    if ! has_command claude; then
+        info "Installing Claude Code CLI..."
+        npm install -g @anthropic-ai/claude-code
+        success "Claude Code installed"
+    else
+        success "Claude Code already available"
+    fi
+
+    # Install Atuin (session-aware shell history)
+    if ! has_command atuin; then
+        info "Installing Atuin (shell history)..."
+        # Use direct installer with quiet mode - skip the wrapper that modifies shell configs
+        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/atuinsh/atuin/releases/latest/download/atuin-installer.sh | sh -s -- -q
+
+        # Add to PATH for this session
+        [[ -f "$HOME/.atuin/bin/env" ]] && source "$HOME/.atuin/bin/env"
+
+        if has_command atuin; then
+            success "Atuin installed"
+
+            # Import existing history if available
+            if [[ -f "$HOME/.bash_history" ]]; then
+                info "Importing existing shell history..."
+                atuin import auto 2>/dev/null || true
+                success "History imported"
+            fi
+        else
+            warning "Atuin installation failed - history will use fallback mode"
+        fi
+    else
+        success "Atuin already available"
+    fi
+
     # Install vim-plug for neovim (lightweight setup)
     if [[ ! -f "$HOME/.local/share/nvim/site/autoload/plug.vim" ]]; then
         info "Installing vim-plug for neovim..."
@@ -118,16 +155,49 @@ main() {
             https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 2>/dev/null
         success "vim-plug installed"
     fi
+
+    # Install kitty terminal (GPU-accelerated, supports vim scrollback)
+    if ! has_command kitty; then
+        info "Installing kitty terminal..."
+        if has_command apt-get; then
+            sudo apt-get install -y kitty
+        elif has_command pacman; then
+            sudo pacman -S --noconfirm kitty
+        elif has_command brew; then
+            brew install --cask kitty
+        else
+            warning "Could not install kitty automatically. Install manually if desired."
+        fi
+        if has_command kitty; then
+            success "Kitty installed: $(kitty --version)"
+        fi
+    else
+        success "Kitty already available: $(kitty --version)"
+    fi
+
+    # Set up kitty config symlink
+    if has_command kitty; then
+        info "Configuring kitty terminal..."
+        mkdir -p "$HOME/.config/kitty"
+        if [[ ! -L "$HOME/.config/kitty/kitty.conf" ]]; then
+            if [[ -f "$HOME/.config/kitty/kitty.conf" ]]; then
+                mv "$HOME/.config/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf.backup"
+                info "Backed up existing kitty.conf"
+            fi
+            ln -s "$SHELL_DIR/tools/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
+        fi
+        success "Kitty configured with vim-style scrollback (ctrl+shift+h)"
+    fi
     
     info "Note: dev-tools environment will be created automatically on first shell startup"
     
     info "🏗️ Architecture: OS → APT/Brew (minimal) → Micromamba → dev-tools → project envs"
     success "Development environment isolation complete!"
     
-    # Backup existing .zshrc
-    if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
-        info "Backing up existing .zshrc to .zshrc.backup"
-        cp "$HOME/.zshrc" "$HOME/.zshrc.backup"
+    # Backup existing .bashrc
+    if [[ -f "$HOME/.bashrc" && ! -L "$HOME/.bashrc" ]]; then
+        info "Backing up existing .bashrc to .bashrc.backup"
+        cp "$HOME/.bashrc" "$HOME/.bashrc.backup"
         success "Backup created"
     fi
     
@@ -142,14 +212,14 @@ main() {
     fi
     
     # Create symlink
-    info "Setting up .zshrc symlink..."
-    rm -f "$HOME/.zshrc"  # Remove existing file or symlink
-    ln -s "$SHELL_DIR/zshrc" "$HOME/.zshrc"
-    success "Symlink created: ~/.zshrc -> ~/.thomcom_shell/zshrc"
+    info "Setting up .bashrc symlink..."
+    rm -f "$HOME/.bashrc"  # Remove existing file or symlink
+    ln -s "$SHELL_DIR/bashrc" "$HOME/.bashrc"
+    success "Symlink created: ~/.bashrc -> ~/.thomcom_shell/bashrc"
     
     # Create necessary directories
     info "Creating required directories..."
-    mkdir -p "$HOME/.zsh_broadcasts"
+    mkdir -p "$HOME/.bash_broadcasts"
     success "Broadcast directory created"
     
     # Handle work-specific configuration  
@@ -159,8 +229,8 @@ main() {
         mkdir -p "$SECRETS_DIR"
         info "Created $SECRETS_DIR directory for work-specific configurations"
         
-        cat > "$SECRETS_DIR/work.zsh" << 'EOF'
-#!/bin/zsh
+        cat > "$SECRETS_DIR/work.sh" << 'EOF'
+#!/bin/bash
 ##############################################################################
 # Work-Specific Configuration
 # Add your company/work-specific settings here
@@ -169,7 +239,7 @@ main() {
 # Example: Internal network hosts
 # export INTERNAL_HOST=10.0.0.1
 
-# Example: Work-specific aliases  
+# Example: Work-specific aliases
 # alias deploy='./scripts/deploy.sh'
 
 # Example: Startup commands (called automatically if defined)
@@ -178,26 +248,12 @@ main() {
 #     micromamba activate work-env
 # }
 EOF
-        info "Created template work configuration at $SECRETS_DIR/work.zsh"
+        info "Created template work configuration at $SECRETS_DIR/work.sh"
     fi
     
-    # Set ZSH as default shell if not already
-    if [[ "$SHELL" != *"zsh"* ]]; then
-        info "Setting ZSH as default shell..."
-        if grep -q "$(which zsh)" /etc/shells; then
-            # Use timeout to prevent hanging, and make it non-interactive
-            if timeout 10s chsh -s "$(which zsh)" 2>/dev/null; then
-                success "ZSH set as default shell (takes effect on next login)"
-            else
-                warning "Could not change default shell automatically"
-                info "To set manually, run: chsh -s \$(which zsh)"
-            fi
-        else
-            warning "ZSH not in /etc/shells - please add it manually:"
-            info "Run: echo \$(which zsh) | sudo tee -a /etc/shells"
-        fi
-    fi
-    
+    # We do not change the user's default shell
+    # bash configuration works with any default shell
+
     # Run tests to verify installation
     info "Running installation tests..."
     if "$SHELL_DIR/tests/test_suite.sh" >/dev/null 2>&1; then
@@ -207,14 +263,14 @@ EOF
     fi
     
     echo -e "\n${GREEN}🎉 Installation completed successfully!${NC}\n"
-    echo "Starting ZSH with your new configuration..."
+    echo "Starting bash with your new configuration..."
     echo
     echo "Documentation: $SHELL_DIR/README.md"
     echo "Support: https://github.com/thomcom/thomcom-shell/issues"
     echo
     
-    # Source the configuration and start ZSH to demonstrate it works
-    exec zsh -c "source ~/.zshrc; exec zsh"
+    # Source the configuration and start bash to demonstrate it works
+    exec bash -c "source ~/.bashrc; exec bash"
 }
 
 # Check if running as root
