@@ -1,33 +1,23 @@
 FROM ubuntu:24.04
 
-# Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install essential dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    sudo \
-    bzip2 \
+    git git-lfs curl sudo bzip2 ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create test user (non-root) with sudo access
 RUN useradd -m -s /bin/bash testuser && \
     echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER testuser
 WORKDIR /home/testuser
 
-# Copy thomcom_shell into the container
-# Note: Build context must be parent directory
 COPY --chown=testuser:testuser . /home/testuser/.thomcom_shell/
 
-# Run the full installer (installs micromamba, nvm, node, claude, etc.)
-# Note: This will take several minutes - installing micromamba, nvm, node, and Claude Code
-RUN cd /home/testuser/.thomcom_shell && timeout 600 bash install.sh || true
+# Run full tier install in docker mode
+RUN cd /home/testuser/.thomcom_shell && timeout 600 bash install.sh --tier full --docker || true
 
 # Run the test suite
 RUN cd /home/testuser/.thomcom_shell/tests && bash test_suite.sh || echo "Tests completed with warnings"
 
-# Default entrypoint for interactive testing
 CMD ["/bin/bash", "-l"]

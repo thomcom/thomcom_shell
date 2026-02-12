@@ -18,8 +18,8 @@
 #
 ##############################################################################
 
-# Ensure TERMINFO points to kitty's terminfo when using kitty
-[[ "$TERM" == *kitty* ]] && export TERMINFO=/usr/lib/kitty/terminfo
+# Ensure TERMINFO is set for alacritty or other modern terminals
+[[ "$TERM" == *alacritty* ]] && export TERMINFO="${TERMINFO:-/usr/share/terminfo}"
 
 # Essential PATH components
 export PATH="$HOME/.local/bin:$PATH"

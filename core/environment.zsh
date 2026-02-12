@@ -18,6 +18,9 @@
 #
 ##############################################################################
 
+# Ensure TERMINFO is set for alacritty or other modern terminals
+[[ "$TERM" == *alacritty* ]] && export TERMINFO="${TERMINFO:-/usr/share/terminfo}"
+
 # Essential PATH components
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$PATH:/usr/local/cuda/bin"
@@ -26,6 +29,9 @@ export PATH="$PATH:$HOME/bin"
 export PATH="$PATH:$HOME/.local/bin"
 
 # Core environment variables (work-specific vars loaded separately)
+
+# GPU rendering - force AMD RX 580 (DRI_PRIME=1 uses discrete GPU)
+export DRI_PRIME=1
 
 # Build tools
 export GRADLE_HOME=/opt/gradle/gradle-8.8

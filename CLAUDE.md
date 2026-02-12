@@ -2,50 +2,77 @@
 
 Modular shell configuration system with terminal broadcast, session logging, and Claude Code integration.
 
-**Last updated**: 2026-01-28 (Git last commit: 2025-11-18 - README.md and this file may need updates)
+**Last updated**: 2026-02-12
 
 ## What It Does
 
 - **Broadcast system**: `zbc "command"` sends commands to all active terminal sessions via SIGUSR1
 - **Session logging**: Every terminal session logged to `~/data/terminal-sessions/` using `script`
 - **Modular config**: Core, interactive, tools, logging modules loaded conditionally
-- **Dev environment**: Installs micromamba, nvm, atuin, kitty, Claude Code CLI
+- **Tiered install**: `base` (CLI essentials), `shell` (+ atuin, nvm), `full` (+ broadcast, logging, Claude Code)
+- **Dev environment**: Installs micromamba, nvm, atuin, Claude Code CLI
 
 ## Architecture
 
 ```
-zshrc (entry point)
+bashrc (entry point, tier-aware)
+├── VERSION              - Semantic version (e.g. 0.1.0)
+├── .tier                - Installed tier (base|shell|full)
 ├── core/
-│   ├── environment.zsh  - PATH, exports, dev tool config
-│   ├── options.zsh      - zsh options (setopt)
-│   └── history.zsh      - history config, Atuin integration
+│   ├── environment.sh   - PATH, exports, dev tool config
+│   ├── options.sh       - bash options (shopt)
+│   └── history.sh       - history config, Atuin integration
 ├── tools/
-│   ├── conda.zsh        - micromamba init
-│   ├── nvm.zsh          - node version manager
-│   ├── fzf.zsh          - fuzzy finder keybindings
-│   ├── atuin.zsh        - session-aware history
-│   ├── kitty.zsh        - terminal config
-│   └── system.zsh       - system utilities
+│   ├── conda.sh         - micromamba init (base)
+│   ├── fzf.sh           - fuzzy finder keybindings (base)
+│   ├── atuin.sh         - session-aware history (shell+)
+│   ├── nvm.sh           - node version manager (shell+)
+│   └── system.sh        - system utilities (full)
 ├── features/
-│   └── broadcast.zsh    - zbc() command, SIGUSR1 handling
+│   └── broadcast.sh     - zbc() command, SIGUSR1 handling (full)
 ├── interactive/
-│   ├── prompt.zsh       - PS1 configuration
-│   ├── aliases.zsh      - shell aliases
-│   ├── colors.zsh       - terminal colors
-│   └── completion.zsh   - tab completion
-└── logging/
-    ├── session-tracker.zsh  - script-based session recording
-    └── replay-tools.zsh     - session playback utilities
+│   ├── prompt.sh        - PS1 configuration
+│   ├── aliases-base.sh  - universal aliases (base)
+│   ├── aliases.sh       - machine-specific aliases (shell+)
+│   ├── colors.sh        - terminal colors
+│   └── completion.sh    - tab completion
+├── logging/
+│   ├── session-tracker.sh  - script-based session recording (full)
+│   └── replay-tools.sh    - session playback utilities (full)
+└── Dockerfile           - Multi-stage build (base/shell/full targets)
+```
+
+## Installation
+
+```bash
+# Full (default)
+./install.sh
+
+# Specific tier
+./install.sh --tier base
+./install.sh --tier shell
+
+# Docker mode (non-interactive)
+./install.sh --tier base --docker
+```
+
+## Docker
+
+```bash
+docker build --target base  -t thomcom-shell:base  .
+docker build --target shell -t thomcom-shell:shell .
+docker build --target full  -t thomcom-shell:full  .
 ```
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `zshrc` | Main entry point, sources modules |
-| `install.sh` | Full installer (bash script) |
-| `features/broadcast.zsh` | The killer feature - cross-terminal commands |
-| `logging/session-tracker.zsh` | Uses `script` to log all output |
+| `bashrc` | Main entry point, tier-aware module loading |
+| `install.sh` | Tiered installer (--tier base/shell/full --docker) |
+| `VERSION` | Semantic version, exported as $THOMCOM_SHELL_VERSION |
+| `features/broadcast.sh` | The killer feature - cross-terminal commands |
+| `logging/session-tracker.sh` | Uses `script` to log all output |
 
 ## Testing
 
@@ -53,25 +80,3 @@ zshrc (entry point)
 ./tests/test_suite.sh         # Run test suite
 ./tests/run_docker_tests.sh   # Docker-based testing
 ```
-
-## Current State
-
-- **Shell**: zsh (migration to bash planned)
-- **zsh-specific features**:
-  - `setopt` calls in options.zsh
-  - `precmd` hooks in broadcast.zsh
-  - `TRAPEXIT`/`TRAPUSR1` signal handlers
-  - zsh-style arrays and expansion
-  - `[[ -o interactive ]]` tests
-  - zsh completion system
-
-## Migration Notes (zsh → bash)
-
-Key differences to address:
-1. `setopt` → `shopt` equivalents
-2. `precmd` → `PROMPT_COMMAND`
-3. `TRAPEXIT`/`TRAPUSR1` → `trap` commands
-4. `[[ -o interactive ]]` → `[[ $- == *i* ]]`
-5. Array syntax differences
-6. Completion system (bash-completion instead)
-7. Module naming: `.zsh` → `.bash` or `.sh`

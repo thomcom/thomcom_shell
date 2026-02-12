@@ -1,27 +1,23 @@
 #!/bin/bash
 ##############################################################################
-# Aliases - Command shortcuts and customizations
+# Aliases - Machine-specific command shortcuts
+# Loads base aliases first, then adds machine-specific ones
 ##############################################################################
 
-# Basic file operations
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
+# Load base aliases (available at all tiers)
+[[ -f "$THOMCOM_SHELL_ROOT/interactive/aliases-base.sh" ]] && source "$THOMCOM_SHELL_ROOT/interactive/aliases-base.sh"
 
 # Application customizations
 alias emacs='emacs -nw'
 alias clang-format='clang-format-11'
 alias xclip='xclip -selection clipboard'
 
-# Custom functions as aliases
+# Bitwig with HiDPI scaling
 bitwig() { GDK_SCALE=1 GDK_DPI_SCALE=1.42 /opt/bitwig-studio/bitwig-studio "$@"; }
-ff() { /usr/bin/find . -name "$1"; }
 
 # Alert notification
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" \
   "$(history | tail -n1 | sed -e "s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//")"'
-
-# Work-specific aliases loaded separately
 
 # CUDA version switching
 alias use-cuda12='export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}} && export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}'
@@ -30,13 +26,12 @@ alias use-cuda11='export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}} && expor
 # GitLab CI shortcut
 alias gcl='gitlab-ci-local'
 
-# Exit prevention (use logout to exit)
-alias exit="echo Use 'logout' to exit"
+# GCP shortcuts
+alias instances='gcloud compute instances list --zone=us-central1-a'
 
-# Sensible du defaults
-du() {
-    command du -h -d 1 -- "$@"
+# gssh: SSH to GCE instance
+gssh() {
+    local instance="$1"
+    shift 2>/dev/null
+    gcloud compute ssh "$instance" --zone=us-central1-a "$@"
 }
-
-# Load custom aliases if available
-[[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
