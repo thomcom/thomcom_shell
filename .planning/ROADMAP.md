@@ -110,7 +110,11 @@ Plans:
 
 **Requirements:** TST-01, TST-02, TST-03, TST-04
 
-**Plans:** (created by /gsd:plan-phase)
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md - Convert test suite and Docker infrastructure to bash
+- [ ] 04-02-PLAN.md - Run tests and verify all functionality
 
 **Success Criteria:**
 1. `tests/test_suite.sh` runs under bash
