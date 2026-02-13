@@ -98,10 +98,11 @@ install_base() {
     info "Setting up micromamba..."
     if ! has_command micromamba; then
         info "Installing micromamba..."
-        curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+        tmpdir=$(mktemp -d)
+        curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj -C "$tmpdir" bin/micromamba
         mkdir -p "$HOME/bin"
-        mv bin/micromamba "$HOME/bin/"
-        rmdir bin 2>/dev/null || true
+        mv "$tmpdir/bin/micromamba" "$HOME/bin/"
+        rm -rf "$tmpdir"
         export MAMBA_EXE="$HOME/bin/micromamba"
         export MAMBA_ROOT_PREFIX="$HOME/data/micromamba"
         export PATH="$HOME/bin:$PATH"

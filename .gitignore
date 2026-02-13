@@ -1,16 +1,22 @@
-# Sensitive or machine-specific files that should not be committed
+# Sensitive or machine-specific files
 *.log
 *.tmp
 *~
 .DS_Store
 
-# Work-specific files should be in ~/.nvidia/ instead
+# Work-specific files
 work/
 secret/
 
-# Claude Code workspace isolation
+# Claude Code
+.claude/
 .claude-workspace/
 .claude-current-workspace
 
-# First-run marker
+# Machine-specific state
+.tier
 .welcomed
+*.backup
+
+# Hardware-specific scripts (not part of shell config)
+xreal_*.sh
