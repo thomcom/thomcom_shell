@@ -71,4 +71,4 @@ bash tests/test_suite.sh
 
 ## License
 
-Copyright AgentiAgency, LLC. All Rights Reserved.
+MIT
