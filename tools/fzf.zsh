@@ -30,10 +30,10 @@ if command -v fzf >/dev/null 2>&1; then
         
         # For non-interactive shells, provide basic Ctrl+R functionality
         if [[ -n "$ZSH_VERSION" ]]; then
-            # Simple history widget that works without the complex key-bindings file
+            # Simple history widget that reads from shared history file
             fzf-history-widget() {
-                local selected
-                selected=$(fc -rl 1 | fzf --height=40% --reverse --query="$LBUFFER" | cut -d' ' -f2-)
+                local selected histfile="${SHARED_HISTFILE:-$HOME/.zsh_history}"
+                selected=$(cat "$histfile" 2>/dev/null | fzf --height=40% --reverse --tac --query="$LBUFFER")
                 if [[ -n "$selected" ]]; then
                     LBUFFER="$selected"
                 fi
@@ -49,3 +49,23 @@ fi
 # Note: FZF_EXCLUDE can be set elsewhere if needed
 _fzf_compgen_path() { fd --follow $FZF_EXCLUDE . "$1"; }
 _fzf_compgen_dir()  { fd --type d --follow $FZF_EXCLUDE . "$1"; }
+
+##############################################################################
+# Fallback fzf-history-widget (only if atuin not available)
+# When atuin is installed, tools/atuin.zsh provides a better session-aware widget
+##############################################################################
+if [[ -o interactive ]] && ! command -v atuin >/dev/null 2>&1; then
+    fzf-history-widget() {
+        local selected histfile="${SHARED_HISTFILE:-$HOME/.zsh_history}"
+        setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2>/dev/null
+        selected=$(cat "$histfile" 2>/dev/null | awk '!seen[$0]++' | tac |
+            FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} ${FZF_DEFAULT_OPTS-} --scheme=history --bind=ctrl-r:toggle-sort,ctrl-z:ignore ${FZF_CTRL_R_OPTS-} --query=${(qqq)LBUFFER} +m" $(__fzfcmd))
+        local ret=$?
+        if [[ -n "$selected" ]]; then
+            LBUFFER="$selected"
+        fi
+        zle reset-prompt
+        return $ret
+    }
+    zle -N fzf-history-widget
+fi

@@ -77,4 +77,4 @@ echo "Appending log to: $LOGFILE"
 # Replace this shell with 'script', appending all output
 # Run script with explicit shell command that sets INSIDE_SCRIPT=1
 # Preserve TERM/TERMINFO for ncurses compatibility
-exec script -a -f -q "$LOGFILE" -c "INSIDE_SCRIPT=1 CLAUDECODE= TERM=${TERM:-xterm-256color} TERMINFO=${TERMINFO:-/usr/share/terminfo} bash -l"
+exec script -a -f -q "$LOGFILE" -c "INSIDE_SCRIPT=1 CLAUDECODE= CONDA_DEFAULT_ENV= TERM=${TERM:-xterm-256color} TERMINFO=${TERMINFO:-/usr/share/terminfo} bash -l"

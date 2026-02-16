@@ -25,10 +25,20 @@ mkdir -p ~/.zsh_broadcasts
 # Track processed broadcasts to avoid re-execution
 export ZSH_BROADCAST_STATE=~/.zsh_broadcast_state_$$
 
-# Initialize state file with current broadcasts (avoid executing old ones on startup)
+# Clean up old broadcasts (older than 60 seconds) and initialize state
+setopt NULL_GLOB
+for broadcast in ~/.zsh_broadcasts/broadcast_*; do
+  [[ -f "$broadcast" ]] || continue
+  # Delete broadcasts older than 60 seconds
+  if [[ $(find "$broadcast" -mmin +1 2>/dev/null) ]]; then
+    rm -f "$broadcast"
+  fi
+done
+unsetopt NULL_GLOB
+
+# Initialize state file (mark any remaining broadcasts as processed to avoid executing stale ones)
 if [[ ! -f "$ZSH_BROADCAST_STATE" ]]; then
-  # Mark all existing broadcasts as processed
-  setopt NULL_GLOB  # Don't error on no matches
+  setopt NULL_GLOB
   for broadcast in ~/.zsh_broadcasts/broadcast_*; do
     [[ -f "$broadcast" ]] && echo "$(basename "$broadcast")" >> "$ZSH_BROADCAST_STATE"
   done
@@ -112,7 +122,8 @@ zbc() {
   echo "📡 Broadcasting: $cmd"
   
   # Signal all zsh processes except ourselves
-  pkill -USR1 -f "zsh" 2>/dev/null || true
+  # Use -x for exact match to avoid hitting editors/tools with "zsh" in args
+  pkill -USR1 -x "zsh" 2>/dev/null || true
   
   return 0
 }

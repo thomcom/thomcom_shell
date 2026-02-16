@@ -25,7 +25,7 @@ if command -v fzf >/dev/null 2>&1; then
         # For non-interactive (like CLAUDECODE), manually source the key parts
         # This preserves the trust legacy of ~/.fzf.bash while enabling non-interactive use
         if [[ -f /usr/share/doc/fzf/examples/completion.bash ]]; then
-            source /usr/share/doc/fzf/examples/completion.bash 2>/dev/null || true
+            source /usr/share/doc/fzf/examples/completion.bash
         fi
     fi
 fi
@@ -42,7 +42,7 @@ _fzf_compgen_dir()  { fd --type d --follow $FZF_EXCLUDE . "$1"; }
 if [[ $- == *i* ]] && ! command -v atuin >/dev/null 2>&1; then
     fzf-history-widget() {
         local selected histfile="${SHARED_HISTFILE:-$HOME/.bash_history}"
-        selected=$(cat "$histfile" 2>/dev/null | awk '!seen[$0]++' | tac |
+        selected=$(cat "$histfile" | awk '!seen[$0]++' | tac |
             FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} ${FZF_DEFAULT_OPTS-} --scheme=history --bind=ctrl-r:toggle-sort,ctrl-z:ignore ${FZF_CTRL_R_OPTS-} --query=\"${READLINE_LINE}\" +m" fzf)
         local ret=$?
         if [[ -n "$selected" ]]; then

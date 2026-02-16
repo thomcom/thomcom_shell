@@ -86,3 +86,32 @@ source_module "tools/fzf.zsh"
 
 # Clean up
 unset -f source_module
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/devkit/vibecode/idempotent-agentic-swarms/google-cloud-sdk/path.zsh.inc' ]; then . '/home/devkit/vibecode/idempotent-agentic-swarms/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/devkit/vibecode/idempotent-agentic-swarms/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/devkit/vibecode/idempotent-agentic-swarms/google-cloud-sdk/completion.zsh.inc'; fi
+
+# gssh completion - complete instance names from gcloud
+_gssh() {
+    local instances
+    instances=(${(f)"$(gcloud compute instances list --format='value(name)' --filter='status=RUNNING' 2>/dev/null)"})
+    _describe 'instance' instances
+}
+compdef _gssh gssh
+
+# TERM is set by the terminal emulator and tmux — don't override here
+
+# bun completions
+[ -s "/home/devkit/.bun/_bun" ] && source "/home/devkit/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+alias claude-mem='bun "/home/devkit/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+
+# OpenClaw Completion
+command -v openclaw &>/dev/null && source <(openclaw completion --shell zsh)
+

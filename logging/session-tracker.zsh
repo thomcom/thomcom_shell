@@ -4,8 +4,8 @@
 # Only loaded for interactive shells that are NOT CLAUDECODE
 ##############################################################################
 
-# Skip if not in a top-level interactive shell or if CLAUDECODE
-[[ -n "$INSIDE_SCRIPT" || "$CLAUDECODE" == "1" || ! -o interactive ]] && return
+# Skip if not in a top-level interactive shell, CLAUDECODE, or inside tmux
+[[ -n "$INSIDE_SCRIPT" || "$CLAUDECODE" == "1" || ! -o interactive || -n "$TMUX" ]] && return
 
 # Only run this block in XFCE environment
 [[ "$XDG_CURRENT_DESKTOP" != "XFCE" ]] && return
@@ -76,4 +76,5 @@ echo "Appending log to: $LOGFILE"
 
 # Replace this shell with 'script', appending all output
 # Run script with explicit shell command that sets INSIDE_SCRIPT=1
-exec script -a -f -q "$LOGFILE" -c "INSIDE_SCRIPT=1 CLAUDECODE= zsh -l"
+# Preserve TERM/TERMINFO for ncurses compatibility
+exec script -a -f -q "$LOGFILE" -c "INSIDE_SCRIPT=1 CLAUDECODE= TERM=${TERM:-xterm-256color} TERMINFO=${TERMINFO:-/usr/share/terminfo} zsh -l"

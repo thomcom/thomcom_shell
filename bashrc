@@ -135,3 +135,9 @@ export TERMINFO=/usr/share/terminfo
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+. "$HOME/.cargo/env"
+
+# Google Cloud SDK
+export PATH="$HOME/google-cloud-sdk/bin:$PATH"
+if [ -f "$HOME/google-cloud-sdk/path.bash.inc" ]; then . "$HOME/google-cloud-sdk/path.bash.inc"; fi
+if [ -f "$HOME/google-cloud-sdk/completion.bash.inc" ]; then . "$HOME/google-cloud-sdk/completion.bash.inc"; fi

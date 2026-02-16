@@ -38,5 +38,16 @@ du() {
     command du -h -d 1 -- "$@"
 }
 
+# GCP shortcuts
+alias instances='gcloud compute instances list --zone=us-central1-a'
+
+# gssh: SSH to GCE instance with tab completion
+# Usage: gssh <instance-name> [extra-args]
+gssh() {
+    local instance="$1"
+    shift 2>/dev/null
+    gcloud compute ssh "$instance" --zone=us-central1-a "$@"
+}
+
 # Load custom aliases if available
 [[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases

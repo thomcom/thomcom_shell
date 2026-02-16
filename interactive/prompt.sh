@@ -25,4 +25,9 @@ fi
 
 # Set the prompt - using Bash format strings
 # Bold green user@host, reset, colon, bold blue path, reset, dollar space
-PS1='\[\033[1;32m\]\u@\h\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]$ '
+# Include conda env prefix if active
+if [[ -n "$CONDA_DEFAULT_ENV" ]]; then
+    PS1='('"$CONDA_DEFAULT_ENV"') \[\033[1;32m\]\u@\h\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]$ '
+else
+    PS1='\[\033[1;32m\]\u@\h\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]$ '
+fi

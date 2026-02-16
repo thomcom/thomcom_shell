@@ -12,8 +12,8 @@ setopt ignoreeof          # Don't exit on Ctrl-D
 # Vi mode (universal)
 set -o vi
 
-# Correction settings
-setopt CORRECT_ALL        # Run corrections
+# Correction (command names only, not arguments — CORRECT_ALL causes rendering noise)
+setopt CORRECT
 
 # Disable annoying beep
 unsetopt beep
